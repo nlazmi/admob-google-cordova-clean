@@ -1,3 +1,5 @@
+This was forked from https://github.com/appfeel/admob-google-cordova and modified to remove the code that revenue share. 
+
 *<p style="font-size: small;" align="right"><a color="#232323;" href>Made in Barcelona with <span color="#FCB">Love</span> and <span color="#BBCCFF">Code</span></a></p>*
 
 Cordova AdMob plugin
