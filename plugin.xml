@@ -39,8 +39,8 @@
       <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     </config-file>
     <!--config-file target="res/values/strings.xml" parent="/*">
-      <string name="banid">ca-app-pub-8440343014846849/3119840614</string>
-      <string name="intid">ca-app-pub-8440343014846849/4596573817</string>
+      <string name="banid"></string>
+      <string name="intid"></string>
     </config-file-->
     <framework src="com.google.android.gms:play-services-ads:+" />
 
@@ -64,8 +64,8 @@
     <source-file src="src/ios/CDVAdMobAdsAdListener.m" />
 
     <!-- Google AdMob framework -->
-    <dependency id="cordova-libgoogleadmobads" url="https://github.com/appfeel/google-iosadmobads" commit="master"/>
-    
+    <framework src="src/ios/GoogleMobileAds.framework" custom="true" />
+
     <!--config-file target="*-Info.plist" parent="CFBundleURLTypes">
       <array>
         <dict>
