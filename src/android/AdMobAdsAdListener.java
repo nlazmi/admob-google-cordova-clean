@@ -36,12 +36,10 @@ import com.google.android.gms.ads.AdRequest;
 public class AdMobAdsAdListener extends AdListener {
     private String adType = "";
     private AdMobAds admobAds;
-    private boolean isBackFill = false;
 
-    public AdMobAdsAdListener(String adType, AdMobAds admobAds, boolean isBackFill) {
+    public AdMobAdsAdListener(String adType, AdMobAds admobAds) {
         this.adType = adType;
         this.admobAds = admobAds;
-        this.isBackFill = isBackFill;
     }
 
     @Override
@@ -59,7 +57,6 @@ public class AdMobAdsAdListener extends AdListener {
 
     @Override
     public void onAdFailedToLoad(int errorCode) {
-        if (this.isBackFill) {
             final int code = errorCode;
             admobAds.cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -70,9 +67,6 @@ public class AdMobAdsAdListener extends AdListener {
                     admobAds.webView.loadUrl(event);
                 }
             });
-        } else {
-            admobAds.tryBackfill(adType);
-        }
     }
 
     /**
