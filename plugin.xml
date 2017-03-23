@@ -16,6 +16,8 @@
   <js-module src="www/admob.js" name="AdMobAds">
     <clobbers target="window.admob" />
     <clobbers target="window.tappx" />
+    <clobbers target="window.AdMob" />
+    <clobbers target="window.Tappx" />
   </js-module>
 
   <hook type="after_plugin_add" src="scripts/100-prepare-admob-angular.js" />
