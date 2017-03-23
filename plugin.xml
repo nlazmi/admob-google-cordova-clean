@@ -12,7 +12,6 @@
     <engine name="cordova" version=">=4.0.0" />
   </engines>
 
-  <dependency id="cordova-connectivity-monitor" />
 
   <js-module src="www/admob.js" name="AdMobAds">
     <clobbers target="window.admob" />
