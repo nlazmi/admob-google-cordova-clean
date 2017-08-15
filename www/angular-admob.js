@@ -80,6 +80,8 @@ if (typeof angular !== 'undefined') {
         onAdOpened: "appfeel.cordova.admob.onAdOpened",
         onAdLeftApplication: "appfeel.cordova.admob.onAdLeftApplication",
         onAdClosed: "appfeel.cordova.admob.onAdClosed",
+        onAdRewarded: "appfeel.cordova.admob.onAdRewarded", 
+        onAdStarted: "appfeel.cordova.admob.onAdStarted",
         onInAppPurchaseRequested: "appfeel.cordova.admob.onInAppPurchaseRequested"
       },
       AD_SIZE: {
@@ -91,7 +93,8 @@ if (typeof angular !== 'undefined') {
       },
       AD_TYPE: {
         BANNER: 'banner',
-        INTERSTITIAL: 'interstitial'
+        INTERSTITIAL: 'interstitial',
+        REWARDED: 'rewarded'
       },
       PURCHASE_RESOLUTION: {
         RESOLUTION_CANCELED: 2,
@@ -134,6 +137,16 @@ if (typeof angular !== 'undefined') {
           return makePromise(window.admob.showInterstitialAd, []);
         });
       },
+      requestRewardedAd: function (options) {
+        return deviceready.promise.then(function () {
+          return makePromise(window.admob.requestRewardedAd, [options]);
+        });
+      },
+      showRewardedAd: function () {
+        return deviceready.promise.then(function () {
+          return makePromise(window.admob.showRewardedAd, []);
+        });
+      },
       recordResolution: function (purchaseId, resolution) {
         return deviceready.promise.then(function () {
           return makePromise(window.admob.recordResolution, [purchaseId, resolution]);
@@ -167,6 +180,14 @@ if (typeof angular !== 'undefined') {
       $rootScope.$broadcast(angularAdmob.eventPrefix + window.admob.events.onAdClosed, e);
     }
 
+    function _onAdRewarded(e) {
+      $rootScope.$broadcast(angularAdmob.eventPrefix + window.admob.events.onAdRewarded, e);
+    }
+
+    function _onAdStarted(e) {
+      $rootScope.$broadcast(angularAdmob.eventPrefix + window.admob.events.onAdStarted, e);
+    }
+
     function _onInAppPurchaseRequested(e) {
       $rootScope.$broadcast(angularAdmob.eventPrefix + window.admob.events.onInAppPurchaseRequested, e);
     }
@@ -177,6 +198,9 @@ if (typeof angular !== 'undefined') {
       document.addEventListener(window.admob.events.onAdOpened, _onAdOpened, true);
       document.addEventListener(window.admob.events.onAdLeftApplication, _onAdLeftApplication, true);
       document.addEventListener(window.admob.events.onAdClosed, _onAdClosed, true);
+      document.addEventListener(window.admob.events.onAdRewarded, _onAdRewarded, true);
+      document.addEventListener(window.admob.events.onAdStarted, _onAdStarted, true);
+     
       document.addEventListener(window.admob.events.onInAppPurchaseRequested, _onInAppPurchaseRequested, true);
 
       angularAdmob.AD_SIZE = window.admob.AD_SIZE;
@@ -204,6 +228,8 @@ if (typeof angular !== 'undefined') {
       document.removeEventListener(window.admob.events.onAdOpened, angularAdmob._onAdOpened, true);
       document.removeEventListener(window.admob.events.onAdLeftApplication, angularAdmob._onAdLeftApplication, true);
       document.removeEventListener(window.admob.events.onAdClosed, angularAdmob._onAdClosed, true);
+      document.removeEventListener(window.admob.events.onAdRewarded, angularAdmob._onAdRewarded, true);
+      document.removeEventListener(window.admob.events.onAdStarted, angularAdmob._onAdStarted, true);
       document.removeEventListener(window.admob.events.onInAppPurchaseRequested, angularAdmob._onInAppPurchaseRequested, true);
     });
 
