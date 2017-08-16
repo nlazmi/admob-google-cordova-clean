@@ -37,7 +37,8 @@ import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 public class AdMobRewardedVideoAdListener implements RewardedVideoAdListener {
     private String adType = "rewarded";
     private AdMobAds admobAds;
-
+    private int rewardAmount = 0;
+    private String rewardType = "";
     public AdMobRewardedVideoAdListener(String adType, AdMobAds admobAds) {
         this.adType = adType;
         this.admobAds = admobAds;
@@ -72,18 +73,6 @@ public class AdMobRewardedVideoAdListener implements RewardedVideoAdListener {
             public void run() {
                 Log.d(AdMobAds.ADMOBADS_LOGTAG, adType + ": left application");
                 String event = String.format("javascript:cordova.fireDocumentEvent(admob.events.onAdLeftApplication, { 'adType': '%s' });", adType);
-                admobAds.webView.loadUrl(event);
-            }
-        });
-    }
-
-    @Override
-    public void onRewardedVideoAdClosed() {
-        admobAds.cordova.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(AdMobAds.ADMOBADS_LOGTAG, adType + ": ad closed after clicking on it");
-                String event = String.format("javascript:cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType': '%s' });", adType);
                 admobAds.webView.loadUrl(event);
             }
         });
@@ -133,6 +122,8 @@ public class AdMobRewardedVideoAdListener implements RewardedVideoAdListener {
     public void onRewarded(RewardItem reward) {
         final String rewardType = reward.getType();
         final int rewardAmount = reward.getAmount();
+        this.rewardType = rewardType;
+        this.rewardAmount = rewardAmount;
         //admobAds.onAdRewarded(adType);
         admobAds.cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -145,8 +136,25 @@ public class AdMobRewardedVideoAdListener implements RewardedVideoAdListener {
     }
 
     @Override
+    public void onRewardedVideoAdClosed() {
+        final String rewardType = this.rewardType;
+        final int rewardAmount = this.rewardAmount;
+
+        admobAds.cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(AdMobAds.ADMOBADS_LOGTAG, adType + ": ad closed after clicking on it");
+                String event = String.format("javascript:cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType': '%s','rewardType': '%s','rewardAmount': %d  });", adType,rewardType,rewardAmount);
+                admobAds.webView.loadUrl(event);
+            }
+        });
+    }
+
+    @Override
     public void onRewardedVideoStarted() {
         //admobAds.onAdStarted(adType);
+        this.rewardType = "";
+        this.rewardAmount = 0;
         admobAds.cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
