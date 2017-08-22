@@ -1,0 +1,3 @@
+-remove all includes but GoogleMobileAds as it seesm to include them all (see example https://github.com/googleads/googleads-mobile-ios-examples/tree/master/Objective-C/admob/RewardedVideoExample/RewardedVideoExample)
+-split rewarded ads to own plugin
+-use pods (see example https://github.com/googleads/googleads-mobile-ios-examples/tree/master/Objective-C/admob/RewardedVideoExample/RewardedVideoExample)

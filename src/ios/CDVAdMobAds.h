@@ -33,12 +33,17 @@
 #import <GoogleMobileAds/GADInterstitial.h>
 #import <GoogleMobileAds/GADBannerViewDelegate.h>
 #import <GoogleMobileAds/GADInterstitialDelegate.h>
+#import <GoogleMobileAds/GADRewardBasedVideoAdDelegate.h>
+#import <GoogleMobileAds/GoogleMobileAds.h>
 #import "CDVAdMobAdsAdListener.h"
+
 
 #pragma mark - JS requestAd options
 
 @class GADBannerView;
 @class GADInterstitial;
+@class GADRewardBasedVideoAd;
+@class CDVAdMobAdsAdListener;
 @class CDVAdMobAdsAdListener;
 
 #pragma mark AdMobAds Plugin
@@ -47,13 +52,16 @@
 }
 
 @property (assign) BOOL isInterstitialAvailable;
+@property (assign) BOOL isRewardedAvailable;
 
 @property (nonatomic, retain) GADBannerView *bannerView;
 @property (nonatomic, retain) GADInterstitial *interstitialView;
+@property (nonatomic, retain) GADRewardBasedVideoAd *rewardedView;
 @property (nonatomic, retain) CDVAdMobAdsAdListener *adsListener;
 
 @property (nonatomic, retain) NSString* publisherId;
 @property (nonatomic, retain) NSString* interstitialAdId;
+@property (nonatomic, retain) NSString* rewardedAdId;
 @property (nonatomic, retain) NSString* tappxId;
 
 @property (assign) GADAdSize adSize;
@@ -69,6 +77,7 @@
 @property (assign) BOOL isBannerShow;
 @property (assign) BOOL isBannerAutoShow;
 @property (assign) BOOL isInterstitialAutoShow;
+@property (assign) BOOL isRewardedAutoShow;
 @property (assign) BOOL hasTappx;
 @property (assign) double tappxShare;
 
@@ -81,7 +90,11 @@
 - (void)requestInterstitialAd:(CDVInvokedUrlCommand *)command;
 - (void)showInterstitialAd:(CDVInvokedUrlCommand *)command;
 
+- (void)requestRewardedAd:(CDVInvokedUrlCommand *)command;
+- (void)showRewardedAd:(CDVInvokedUrlCommand *)command;
+
 - (void)onBannerAd:(GADBannerView *)adView adListener:(CDVAdMobAdsAdListener *)adListener ;
 - (void)onInterstitialAd:(GADInterstitial *)interstitial adListener:(CDVAdMobAdsAdListener *)adListener;
+- (void)onRewardedAd:(GADRewardBasedVideoAd *)rewarded rewardedListener:(CDVAdMobAdsAdListener *)rewardedListener;
 
 @end

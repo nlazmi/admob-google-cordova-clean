@@ -30,6 +30,8 @@
 
 @interface CDVAdMobAdsAdListener()
 - (NSString *) __getErrorReason:(NSInteger) errorCode;
+@property(nonatomic, assign) NSInteger rewardAmount;
+@property(nonatomic, assign) NSString rewardType;
 @end
 
 
@@ -177,6 +179,111 @@
     }];
     adMobAds.isInterstitialAvailable = false;
 }
+
+
+
+#pragma mark -
+#pragma mark GADRewardBasedVideoAdDelegate implementation
+
+// Sent when an interstitial ad request succeeded.  Show it at the next
+// transition point in your application such as when transitioning between view
+// controllers.
+// onAdLoaded
+- (void)rewardBasedVideoAdDidReceiveAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
+    if (adMobAds.rewardedView) {
+        [adMobAds onRewardedAd:rewarded rewardedListener:self];
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [adMobAds.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdLoaded, { 'adType' : 'rewarded' }); }, 1);"];
+        }];
+    }
+}
+- (void)rewardedDidFailedToShow:(GADRewardBasedVideoAd *) rewarded {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSString *jsString =
+        @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdFailedToLoad, "
+        @"{ 'adType' : 'rewarded', 'error': %ld, 'reason': '%@' }); }, 1);";
+        [adMobAds.commandDelegate evalJs:[NSString stringWithFormat:jsString,
+                                          0,
+                                          @"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."]];
+    }];
+    
+}
+
+// Sent when an interstitial ad request completed without an interstitial to
+// show.  This is common since interstitials are shown sparingly to users.
+// onAdFailedToLoad
+- (void)rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd didFailToReceiveAdWithError:(GADRequestError *)error {
+    NSLog(@"%s: Failed to receive ad with error: %@",
+          __PRETTY_FUNCTION__, [error localizedFailureReason]);
+    adMobAds.isRewardedAvailable = false;
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSString *jsString =
+        @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdFailedToLoad, "
+        @"{ 'adType' : 'rewarded', 'error': %ld, 'reason': '%@' }); }, 1);";
+        [adMobAds.commandDelegate evalJs:[NSString stringWithFormat:jsString,
+                                          (long)error.code,
+                                          [self __getErrorReason:error.code]]];
+    }];
+    
+}
+
+// Sent just before presenting an interstitial.  After this method finishes the
+// interstitial will animate onto the screen.  Use this opportunity to stop
+// animations and save the state of your application in case the user leaves
+// while the interstitial is on screen (e.g. to visit the App Store from a link
+// on the interstitial).
+// onAdOpened
+- (void)rewardBasedVideoAdDidOpen:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
+    if (adMobAds.isRewardedAvailable) {
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [adMobAds.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdOpened, { 'adType' : 'rewarded' }); }, 1);"];
+        }];
+        adMobAds.isRewardedAvailable = false;
+        self.rewardAmount = 0;
+        self.rewardType = "";
+    }
+}
+
+
+// Sent just after dismissing an rewarded and it has animated off the screen.
+// onAdClosed
+- (void)rewardBasedVideoAdDidClose:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [adMobAds.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType' : 'rewarded' }); }, 1);"];
+        NSString *jsString =
+            [NSString stringWithFormat: 
+            @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %lf }); }, 1);"
+            ,self.rewardType
+            ,[self.rewardAmount doubleValue]
+            ];
+   
+    }];
+    adMobAds.isRewardedAvailable = false;
+    self.rewardAmount = 0;
+}
+
+
+//reward the reward
+- (void)rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
+    didRewardUserWithReward:(GADAdReward *)reward {
+    self.rewardAmount = reward.amount;
+   self.rewardType = reward.type;
+  
+      [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSString *jsString =
+            [NSString stringWithFormat: 
+            @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdRewarded, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %lf }); }, 1);"
+            ,reward.type
+            ,[reward.amount doubleValue]
+            ];
+        [adMobAds.commandDelegate evalJs:jsString;
+   
+    }];
+    adMobAds.isRewardedAvailable = false;
+}
+
+#pragma mark -
+#pragma mark ErrorCodes
 
 - (NSString *) __getErrorReason:(NSInteger) errorCode {
     switch (errorCode) {

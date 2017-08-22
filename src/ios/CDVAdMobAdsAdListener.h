@@ -28,15 +28,19 @@
 #import "CDVAdMobAds.h"
 #import <GoogleMobileAds/GADBannerViewDelegate.h>
 #import <GoogleMobileAds/GADInterstitialDelegate.h>
+#import <GoogleMobileAds/GoogleMobileAds.h>
+#import <GoogleMobileAds/GADRewardBasedVideoAdDelegate.h>
 #import <GoogleMobileAds/GADExtras.h>
 
 @class CDVAdMobAds;
 
-@interface CDVAdMobAdsAdListener : NSObject <GADBannerViewDelegate, GADInterstitialDelegate> {
+@interface CDVAdMobAdsAdListener : NSObject <GADRewardBasedVideoAdDelegate,GADBannerViewDelegate, GADInterstitialDelegate> {
     
 }
 
 @property (nonatomic, retain) CDVAdMobAds *adMobAds;
+@property(nonatomic, assign) NSInteger rewardAmount;
+@property(nonatomic, assign) NSString rewardType;
 
 - (instancetype)initWithAdMobAds: (CDVAdMobAds *)originalAdMobAds ;
 - (void)adViewDidFailedToShow:(GADBannerView *)view;
