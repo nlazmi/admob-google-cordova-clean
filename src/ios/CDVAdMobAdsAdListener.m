@@ -30,8 +30,8 @@
 
 @interface CDVAdMobAdsAdListener()
 - (NSString *) __getErrorReason:(NSInteger) errorCode;
-@property(nonatomic, assign) NSInteger rewardAmount;
-@property(nonatomic, assign) NSString rewardType;
+@property( assign) NSInteger rewardAmount;
+@property( assign) NSString* rewardType;
 @end
 
 
@@ -189,9 +189,9 @@
 // transition point in your application such as when transitioning between view
 // controllers.
 // onAdLoaded
-- (void)rewardBasedVideoAdDidReceiveAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
+- (void)rewardBasedVideoAdDidReceiveAd:(GADRewardBasedVideoAd *)rewarded {
     if (adMobAds.rewardedView) {
-        [adMobAds onRewardedAd:rewarded rewardedListener:self];
+        [adMobAds onRewardedAd:rewarded adListener:self];
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             [adMobAds.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdLoaded, { 'adType' : 'rewarded' }); }, 1);"];
         }];
@@ -240,7 +240,7 @@
         }];
         adMobAds.isRewardedAvailable = false;
         self.rewardAmount = 0;
-        self.rewardType = "";
+        self.rewardType = @"";
     }
 }
 
@@ -249,73 +249,71 @@
 // onAdClosed
 - (void)rewardBasedVideoAdDidClose:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        [adMobAds.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType' : 'rewarded' }); }, 1);"];
+       
         NSString *jsString =
-            [NSString stringWithFormat: 
-            @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %lf }); }, 1);"
-            ,self.rewardType
-            ,[self.rewardAmount doubleValue]
-            ];
-   
+        [NSString stringWithFormat:
+         @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %ld }); }, 1);"
+         ,self.rewardType
+         ,(long)self.rewardAmount
+         ];
+         [adMobAds.commandDelegate evalJs:jsString];
     }];
     adMobAds.isRewardedAvailable = false;
-    self.rewardAmount = 0;
+   
 }
 
 
 //reward the reward
 - (void)rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
-    didRewardUserWithReward:(GADAdReward *)reward {
-    self.rewardAmount = reward.amount;
-   self.rewardType = reward.type;
-  
-      [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+   didRewardUserWithReward:(GADAdReward *)reward {
+    self.rewardAmount = [reward.amount integerValue];
+    self.rewardType = reward.type;
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         NSString *jsString =
-            [NSString stringWithFormat: 
-            @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdRewarded, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %lf }); }, 1);"
-            ,reward.type
-            ,[reward.amount doubleValue]
-            ];
-        [adMobAds.commandDelegate evalJs:jsString;
-   
+        [NSString stringWithFormat:
+         @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdRewarded, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %ld }); }, 1);"
+         ,self.rewardType
+         ,(long)self.rewardAmount
+         ];
+        [adMobAds.commandDelegate evalJs:jsString];
+        adMobAds.isRewardedAvailable = false;
     }];
-    adMobAds.isRewardedAvailable = false;
 }
-
 #pragma mark -
 #pragma mark ErrorCodes
-
+     
 - (NSString *) __getErrorReason:(NSInteger) errorCode {
-    switch (errorCode) {
-        case kGADErrorServerError:
-        case kGADErrorOSVersionTooLow:
-        case kGADErrorTimeout:
-            return @"Internal error";
-            break;
-            
-        case kGADErrorInvalidRequest:
-            return @"Invalid request";
-            break;
-            
-        case kGADErrorNetworkError:
-            return @"Network Error";
-            break;
-            
-        case kGADErrorNoFill:
-            return @"No fill";
-            break;
-            
-        default:
-            return @"Unknown";
-            break;
-    }
-}
-
+         switch (errorCode) {
+             case kGADErrorServerError:
+             case kGADErrorOSVersionTooLow:
+             case kGADErrorTimeout:
+             return @"Internal error";
+             break;
+             
+             case kGADErrorInvalidRequest:
+             return @"Invalid request";
+             break;
+             
+             case kGADErrorNetworkError:
+             return @"Network Error";
+             break;
+             
+             case kGADErrorNoFill:
+             return @"No fill";
+             break;
+             
+             default:
+             return @"Unknown";
+             break;
+         }
+     }
+     
 #pragma mark -
 #pragma mark Cleanup
-
-- (void)dealloc {
-    adMobAds = nil;
-}
-
+     
+     - (void)dealloc {
+         adMobAds = nil;
+     }
+     
 @end

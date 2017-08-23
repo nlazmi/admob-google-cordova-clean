@@ -39,11 +39,11 @@
 }
 
 @property (nonatomic, retain) CDVAdMobAds *adMobAds;
-@property(nonatomic, assign) NSInteger rewardAmount;
-@property(nonatomic, assign) NSString rewardType;
+
 
 - (instancetype)initWithAdMobAds: (CDVAdMobAds *)originalAdMobAds ;
 - (void)adViewDidFailedToShow:(GADBannerView *)view;
 - (void)interstitialDidFailedToShow:(GADInterstitial *) interstitial;
+- (void)rewardedDidFailedToShow:(GADRewardBasedVideoAd *) rewarded;
 
 @end

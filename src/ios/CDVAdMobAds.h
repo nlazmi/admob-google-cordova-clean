@@ -95,6 +95,6 @@
 
 - (void)onBannerAd:(GADBannerView *)adView adListener:(CDVAdMobAdsAdListener *)adListener ;
 - (void)onInterstitialAd:(GADInterstitial *)interstitial adListener:(CDVAdMobAdsAdListener *)adListener;
-- (void)onRewardedAd:(GADRewardBasedVideoAd *)rewarded rewardedListener:(CDVAdMobAdsAdListener *)rewardedListener;
+- (void)onRewardedAd:(GADRewardBasedVideoAd *)rewarded adListener:(CDVAdMobAdsAdListener *)adListener;
 
 @end

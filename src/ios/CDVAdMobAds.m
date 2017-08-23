@@ -48,6 +48,7 @@
 - (NSString *) __getPublisherId;
 - (NSString *) __getPublisherId:(BOOL)isTappx;
 - (NSString *) __getInterstitialId:(BOOL)isBackFill;
+- (NSString *) __getRewardedId;
 
 - (void)resizeViews;
 
@@ -100,15 +101,15 @@
     // translate the Smart Banner constants according to the orientation.
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter]
-         addObserver:self
-         selector:@selector(deviceOrientationChange:)
-         name:UIDeviceOrientationDidChangeNotification
-         object:nil];
+     addObserver:self
+     selector:@selector(deviceOrientationChange:)
+     name:UIDeviceOrientationDidChangeNotification
+     object:nil];
     
     isBannerShow = true;
     publisherId = nil;
     interstitialAdId = nil;
-    rewaredAdId = nil;
+    rewardedAdId = nil;
     adSize = [self __adSizeFromString:@"SMART_BANNER"];
     
     isBannerAtTop = false;
@@ -131,9 +132,9 @@
     tappxShare = 0.5;
     
     adsListener = [[CDVAdMobAdsAdListener alloc] initWithAdMobAds:self];
-
-   
-
+    
+    
+    
     srand((unsigned)time(NULL));
 }
 
@@ -347,7 +348,7 @@
     }];
 }
 
-- (void)requestRewaredAd:(CDVInvokedUrlCommand *)command {
+- (void)requestRewardedAd:(CDVInvokedUrlCommand *)command {
     NSString *callbackId = command.callbackId;
     NSArray* args = command.arguments;
     
@@ -359,20 +360,20 @@
     
     [self.commandDelegate runInBackground:^{
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        isRewaredRequested = true;
+        isRewardedRequested = true;
         
-        if (!isRewaredAvailable && rewardedView) {
+        if (!isRewardedAvailable && rewardedView) {
             self.rewardedView.delegate = nil;
             self.rewardedView = nil;
         }
         
-        if (isRewaredAvailable) {
-            [adListener rewardedDidReceiveAd:rewardedView];
+        if (isRewardedAvailable) {
+            [adsListener rewardBasedVideoAdDidReceiveAd:rewardedView];
             
         } else if (!self.rewardedView) {
-            NSString *_iid = [self __getRewardedId:false];
+            NSString *_iid = [self __getRewardedId];
             
-            if (![self __createRewared:_iid withAdListener:adListener]) {
+            if (![self __createRewarded:_iid withAdListener:adsListener]) {
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."];
             }
         }
@@ -455,7 +456,7 @@
     }
     return _interstitialAdId;
 }
-- (NSString *) __getRewardedAdId {
+- (NSString *) __getRewardedId {
     NSString *_rewardedAdId = rewardedAdId;
     
     return _rewardedAdId;
@@ -485,7 +486,7 @@
     if (str && ![str isEqual:[NSNull null]] && [str length] > 0) {
         rewardedAdId = str;
     }
-
+    
     str = [options objectForKey:OPT_AD_SIZE];
     if (str && ![str isEqual:[NSNull null]]) {
         adSize = [self __adSizeFromString:str];
@@ -530,7 +531,7 @@
     if (str && ![str isEqual:[NSNull null]]) {
         isRewardedAutoShow = [str boolValue];
     }
-
+    
     str = [options objectForKey:OPT_TAPPX_ID_IOS];
     if (str && ![str isEqual:[NSNull null]]) {
         tappxId = str;
@@ -766,18 +767,17 @@
         self.rewardedView.delegate = nil;
         self.rewardedView = nil;
     }
-
-    //todo: does it need GADMobileAds to be Initialize?
-    ////note: will this cause an issue if called more than once?
-    ////Initialize Google Mobile Ads SDK
-    //[GADMobileAds configureWithApplicationID:publisherId];
-
+    
+    
     dispatch_sync(dispatch_get_main_queue(), ^{
-        self.rewardedView = [[GADRewardBasedVideoAd alloc] initWithAdUnitID:_iid];
+        //Initialize Google Mobile Ads SDK
+        //note: will this cause an issue if called more than once?
+        [GADMobileAds configureWithApplicationID:publisherId];
+        self.rewardedView = [GADRewardBasedVideoAd sharedInstance] ;
     });
     self.rewardedView.delegate = adListener;
-    
     GADRequest *request = [self __buildAdRequest];
+   
     if (!request) {
         succeeded = false;
         if (self.rewardedView) {
@@ -787,7 +787,7 @@
         
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.rewardedView loadRequest:request];
+            [self.rewardedView loadRequest:request withAdUnitID:_iid];
         });
         succeeded = true;
         self.isRewardedAvailable = false;
@@ -801,7 +801,7 @@
     BOOL succeeded = false;
     
     if (!self.rewardedView) {
-        NSString *_iid = [self __getRewardedId:false];
+        NSString *_iid = [self __getRewardedId];
         
         succeeded = [self __createRewarded:_iid withAdListener:adsListener];
         isRewardedRequested = true;
@@ -923,13 +923,13 @@
     
     bannerView.delegate = nil;
     bannerView = nil;
-
+    
     interstitialView.delegate = nil;
     interstitialView = nil;
     
     rewardedView.delegate = nil;
     rewardedView = nil;
-
+    
     adsListener = nil;
     
     adExtras = nil;
