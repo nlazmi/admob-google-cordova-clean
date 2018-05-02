@@ -6,11 +6,11 @@ Cordova AdMob plugin
 Monetize your Cordova/Phonegap/XDK apps with AdMob ads, **using latest Google AdMob SDK**.
 With this Cordova/Phonegap/XDK plugin you can show AdMob ads as easy as:
 
-    admob.createBannerView({publisherId: "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB"});
+    admob.createBannerView({bannerAdId: "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB"});
 
 Or
 
-    admob.requestInterstitialAd({publisherId: "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB", interstitialAdId: "ca-app-pub-XXXXXXXXXXXXXXXX/IIIIIIIIII"});
+    admob.requestInterstitialAd({interstitialAdId: "ca-app-pub-XXXXXXXXXXXXXXXX/IIIIIIIIII"});
 
 ![Integrate cordova admob plugin](https://github.com/appfeel/admob-google-cordova/wiki/demo/integrate-admob-cordova.gif)
 
@@ -48,7 +48,8 @@ To start showing ads, place the following code in your `onDeviceReady` callback.
       
       // Set AdMobAds options:
       admob.setOptions({
-        publisherId:          "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB",  // Required
+        appId:                "ca-app-pub-XXXXXXXXXXXXXXXX~AAAAAAAAAA",  // Required, refer to AdMob's App ID
+        bannerAdId:           "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB",  // Optional
         interstitialAdId:     "ca-app-pub-XXXXXXXXXXXXXXXX/IIIIIIIIII",  // Optional
         tappxIdiOS:           "/XXXXXXXXX/Pub-XXXX-iOS-IIII",            // Optional
         tappxIdAndroid:       "/XXXXXXXXX/Pub-XXXX-Android-AAAA",        // Optional
@@ -119,10 +120,12 @@ Note that the admob ads are configured inside `onDeviceReady()`. This is because
       if (admob) {
         var adPublisherIds = {
           ios : {
+            app : "ca-app-pub-XXXXXXXXXXXXXXXX~AAAAAAAAAA",
             banner : "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB",
             interstitial : "ca-app-pub-XXXXXXXXXXXXXXXX/IIIIIIIIII"
           },
           android : {
+            app : "ca-app-pub-XXXXXXXXXXXXXXXX~AAAAAAAAAA",
             banner : "ca-app-pub-XXXXXXXXXXXXXXXX/BBBBBBBBBB",
             interstitial : "ca-app-pub-XXXXXXXXXXXXXXXX/IIIIIIIIII"
           }
@@ -131,7 +134,8 @@ Note that the admob ads are configured inside `onDeviceReady()`. This is because
         var admobid = (/(android)/i.test(navigator.userAgent)) ? adPublisherIds.android : adPublisherIds.ios;
             
         admob.setOptions({
-          publisherId:      admobid.banner,
+          appId:            admobid.app,
+          bannerAdId:       admobid.banner,
           interstitialAdId: admobid.interstitial,
           tappxIdiOS:       "/XXXXXXXXX/Pub-XXXX-iOS-IIII",
           tappxIdAndroid:   "/XXXXXXXXX/Pub-XXXX-Android-AAAA",

@@ -54,6 +54,7 @@ import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
@@ -79,7 +80,8 @@ public class AdMobAds extends CordovaPlugin {
     private static final String ACTION_RECORD_PLAY_BILLING_RESOLUTION = "recordPlayBillingResolution";
 
     /* options */
-    private static final String OPT_PUBLISHER_ID = "publisherId";
+    private static final String OPT_APP_ID = "appId";
+    private static final String OPT_PUBLISHER_ID = "bannerAdId";
     private static final String OPT_INTERSTITIAL_AD_ID = "interstitialAdId";
     private static final String OPT_AD_SIZE = "adSize";
     private static final String OPT_BANNER_AT_TOP = "bannerAtTop";
@@ -96,6 +98,7 @@ public class AdMobAds extends CordovaPlugin {
     private AdMobAdsAdListener bannerListener = new AdMobAdsAdListener(BANNER, this);
     private AdMobAdsAdListener interstitialListener = new AdMobAdsAdListener(INTERSTITIAL, this);
   
+    private boolean isMobileAdsInitialized = false;
     private boolean isInterstitialAvailable = false;
     private boolean isNetworkActive = false;
     //private View adView;
@@ -113,6 +116,7 @@ public class AdMobAds extends CordovaPlugin {
      * The interstitial ad to display to the user.
      */
     private InterstitialAd interstitialAd;
+    private String appId = ""; // App ID from AdMob
     private String publisherId = "";
     private String interstitialAdId = "";
     private String tappxId = "";
@@ -259,6 +263,9 @@ public class AdMobAds extends CordovaPlugin {
         if (options == null) {
             return;
         }
+        if (options.has(OPT_APP_ID)) {
+            this.appId = options.optString(OPT_APP_ID);
+        }
         if (options.has(OPT_PUBLISHER_ID)) {
             this.publisherId = options.optString(OPT_PUBLISHER_ID);
         }
@@ -298,19 +305,32 @@ public class AdMobAds extends CordovaPlugin {
             hasTappx = true;
         }
     }
+    
+    private void initializeMobileAds(String _aid) {
+		if(!isMobileAdsInitialized) {
+			MobileAds.initialize(cordova.getActivity(), _aid);
+			isMobileAdsInitialized = true;
+		}
+	}
 
     private PluginResult executeCreateBannerView(JSONObject options, final CallbackContext callbackContext) {
         this.setOptions(options);
+        String __aid = getAppId();
         String __pid = getPublisherId();
+        if (__aid.length() == 0) {
+            return new PluginResult(Status.ERROR, "appId is missing");
+        }
         if (__pid.length() == 0) {
-            return new PluginResult(Status.ERROR, "publisherId is missing");
+            return new PluginResult(Status.ERROR, "bannerAdId is missing");
         }
 
+        final String _aid = __aid;
         final String _pid = __pid;
 
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+				initializeMobileAds(_aid);
                 createBannerView(_pid, bannerListener);
                 callbackContext.success();
             }
@@ -529,17 +549,23 @@ public class AdMobAds extends CordovaPlugin {
 
     private PluginResult executeCreateInterstitialView(JSONObject options, final CallbackContext callbackContext) {
         this.setOptions(options);
-        String __pid = getPublisherId();
-        String __iid = interstitialAdId.length() == 0 ? __pid : getInterstitialId();
+        String __aid = getAppId();
+        String __iid = getInterstitialId();
 
+        if (__aid.length() == 0) {
+            return new PluginResult(Status.ERROR, "appId is missing");
+        }
         if (__iid.length() == 0) {
             return new PluginResult(Status.ERROR, "interstitialAdId is missing");
         }
 
+        final String _aid = __aid;
         final String _iid = __iid;
+        
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+				initializeMobileAds(_aid);
                 createInterstitialView(_iid, interstitialListener);
                 callbackContext.success();
             }
@@ -633,6 +659,10 @@ public class AdMobAds extends CordovaPlugin {
         super.onDestroy();
     }
 
+    private String getAppId() {
+        return appId;
+    }
+    
     private String getPublisherId() {
         return getPublisherId(hasTappx);
     }

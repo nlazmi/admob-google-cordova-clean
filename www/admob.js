@@ -64,7 +64,8 @@ admob.PURCHASE_RESOLUTION = {
 
 // This is not used by the plugin, it is just a helper to show how options are specified and their default values
 admob.options = {
-  publisherId: "",
+  appId: "",
+  bannerAdId: "",
   interstitialAdId: "",
   adSize: admob.AD_SIZE.SMART_BANNER,
   bannerAtTop: false,
@@ -88,15 +89,20 @@ admob.setOptions = function (options, successCallback, failureCallback) {
     successCallback = options;
     options = undefined;
   }
+  
+  // Migrate publisherId => bannerAdId
+  if(typeof options === 'object' && options.publisherId != undefined) {
+	  options.bannerAdId = options.publisherId;
+  }
 
   options = options || admob.DEFAULT_OPTIONS;
 
-  if (typeof options === 'object' && typeof options.publisherId === 'string' && options.publisherId.length > 0) {
+  if (typeof options === 'object') {
     cordova.exec(successCallback, failureCallback, 'AdMobAds', 'setOptions', [options]);
 
   } else {
     if (typeof failureCallback === 'function') {
-      failureCallback('options.publisherId should be specified.');
+      failureCallback('options.appId should be specified.');
     }
   }
 };
