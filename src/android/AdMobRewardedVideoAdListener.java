@@ -164,5 +164,15 @@ public class AdMobRewardedVideoAdListener implements RewardedVideoAdListener {
             }
         });
     }
-
+    @Override
+    public void onRewardedVideoCompleted() {
+        admobAds.cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(AdMobAds.ADMOBADS_LOGTAG, adType + ": ad completed");
+                String event = String.format("javascript:cordova.fireDocumentEvent(admob.events.onAdCompleted, { 'adType': '%s' });", adType);
+                admobAds.webView.loadUrl(event);
+            }
+        });
+    }
 }
