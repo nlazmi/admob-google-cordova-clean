@@ -14,7 +14,7 @@
     "engines": [
         {
             "name": "cordova",
-            "version": ">=4.0.0"
+            "version": ">=8.0.0"
         }
     ],
     "homepage": "https://github.com/jamesfdickinson/admob-google-cordova-clean#readme",
@@ -44,7 +44,7 @@
     "name": "cordova-admob-jimmy",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/jamesfdickinson/admob-google-cordova-clean.git"
+        "url": "https://github.com/jamesfdickinson/admob-google-cordova-clean"
     },
-    "version": "4.2.1"
+    "version": "4.3.0"
 }
