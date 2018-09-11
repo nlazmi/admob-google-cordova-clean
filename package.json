@@ -1,10 +1,10 @@
 {
-    "author": "kkleokrish (Original Author: AppFeel)",
+    "author": "jamesfdickinson (Original Author: AppFeel)",
     "bugs": {
-        "url": "https://github.com/kkleokrish/admob-google-cordova-clean/issues"
+        "url": "https://github.com/jamesfdickinson/admob-google-cordova-clean/issues"
     },
     "cordova": {
-        "id": "cordova-admob",
+        "id": "cordova-admob-jimmy",
         "platforms": [
             "android",
             "ios"
@@ -14,10 +14,10 @@
     "engines": [
         {
             "name": "cordova",
-            "version": ">=4.0.0"
+            "version": ">=8.0.0"
         }
     ],
-    "homepage": "https://github.com/kkleokrish/admob-google-cordova-clean#readme",
+    "homepage": "https://github.com/jamesfdickinson/admob-google-cordova-clean#readme",
     "keywords": [
         "ad",
         "ads",
@@ -41,10 +41,10 @@
         "cordova-ios"
     ],
     "license": "MIT",
-    "name": "cordova-admob-clean",
+    "name": "cordova-admob-jimmy",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/kkleokrish/admob-google-cordova-clean.git"
+        "url": "https://github.com/jamesfdickinson/admob-google-cordova-clean"
     },
-    "version": "4.1.16"
+    "version": "4.3.0"
 }

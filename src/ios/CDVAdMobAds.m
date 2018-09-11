@@ -33,18 +33,22 @@
 
 @property (assign) BOOL isBannerRequested;
 @property (assign) BOOL isInterstitialRequested;
+@property (assign) BOOL isRewardedRequested;
 
 - (void) __setOptions:(NSDictionary*) options;
 - (BOOL) __createBanner:(NSString *)_pid withAdListener:(CDVAdMobAdsAdListener *)adListener isTappx:(BOOL)isTappx;
 - (BOOL) __showBannerAd:(BOOL)show;
 - (BOOL) __createInterstitial:(NSString *)_iid withAdListener:(CDVAdMobAdsAdListener *)adListener;
 - (BOOL) __showInterstitial:(BOOL)show;
+- (BOOL) __createRewarded:(NSString *)_iid withAdListener:(CDVAdMobAdsAdListener *)adListener;
+- (BOOL) __showRewarded:(BOOL)show;
 - (GADRequest*) __buildAdRequest;
 - (NSString*) __md5: (NSString*) s;
 - (NSString *) __admobDeviceID;
 - (NSString *) __getPublisherId;
 - (NSString *) __getPublisherId:(BOOL)isTappx;
 - (NSString *) __getInterstitialId:(BOOL)isBackFill;
+- (NSString *) __getRewardedId;
 
 - (void)resizeViews;
 
@@ -57,10 +61,12 @@
 @implementation CDVAdMobAds
 
 #define INTERSTITIAL                @"interstitial";
+#define REWARDED                    @"rewarded";
 #define BANNER                      @"banner";
 
 #define OPT_PUBLISHER_ID            @"publisherId"
 #define OPT_INTERSTITIAL_ADID       @"interstitialAdId"
+#define OPT_REWARDED_ADID           @"rewardedAdId"
 #define OPT_AD_SIZE                 @"adSize"
 #define OPT_BANNER_AT_TOP           @"bannerAtTop"
 #define OPT_OVERLAP                 @"overlap"
@@ -69,20 +75,23 @@
 #define OPT_AD_EXTRAS               @"adExtras"
 #define OPT_AUTO_SHOW_BANNER        @"autoShowBanner"
 #define OPT_AUTO_SHOW_INTERSTITIAL  @"autoShowInterstitial"
+#define OPT_AUTO_SHOW_REWARDED      @"autoShowRewarded"
 #define OPT_TAPPX_ID_IOS            @"tappxIdiOS"
 #define OPT_TAPPX_SHARE             @"tappxShare"
 
 @synthesize isInterstitialAvailable;
+@synthesize isRewardedAvailable;
 
 @synthesize bannerView;
 @synthesize interstitialView;
+@synthesize rewardedView;
 @synthesize adsListener;
-@synthesize publisherId, interstitialAdId, tappxId, adSize, tappxShare;
+@synthesize publisherId, interstitialAdId,rewardedAdId,  tappxId, adSize, tappxShare;
 @synthesize isBannerAtTop, isBannerOverlap, isOffsetStatusBar;
 @synthesize isTesting, adExtras;
 
-@synthesize isBannerVisible, isBannerInitialized, isBannerRequested, isInterstitialRequested;
-@synthesize isBannerShow, isBannerAutoShow, isInterstitialAutoShow, hasTappx;
+@synthesize isBannerVisible, isBannerInitialized, isBannerRequested, isInterstitialRequested, isRewardedRequested;
+@synthesize isBannerShow, isBannerAutoShow, isInterstitialAutoShow,isRewardedAutoShow, hasTappx;
 
 #pragma mark Cordova JS bridge
 
@@ -92,14 +101,15 @@
     // translate the Smart Banner constants according to the orientation.
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter]
-         addObserver:self
-         selector:@selector(deviceOrientationChange:)
-         name:UIDeviceOrientationDidChangeNotification
-         object:nil];
+     addObserver:self
+     selector:@selector(deviceOrientationChange:)
+     name:UIDeviceOrientationDidChangeNotification
+     object:nil];
     
     isBannerShow = true;
     publisherId = nil;
     interstitialAdId = nil;
+    rewardedAdId = nil;
     adSize = [self __adSizeFromString:@"SMART_BANNER"];
     
     isBannerAtTop = false;
@@ -109,17 +119,21 @@
     
     isBannerAutoShow = true;
     isInterstitialAutoShow = true;
+    isRewardedAutoShow = false;
     
     isBannerInitialized = false;
     isBannerVisible = false;
     
     isBannerRequested = false;
     isInterstitialRequested = false;
+    isRewardedRequested = false;
     
     hasTappx = false;
     tappxShare = 0.5;
     
     adsListener = [[CDVAdMobAdsAdListener alloc] initWithAdMobAds:self];
+    
+    
     
     srand((unsigned)time(NULL));
 }
@@ -240,6 +254,32 @@
     }];
 }
 
+- (void)showRewardedAd:(CDVInvokedUrlCommand *)command {
+    NSString *callbackId = command.callbackId;
+    
+    [self.commandDelegate runInBackground:^{
+        CDVPluginResult *pluginResult;
+        
+        if (!isRewardedAvailable && rewardedView) {
+            self.rewardedView.delegate = nil;
+            self.rewardedView = nil;
+        }
+        
+        if (!self.rewardedView) {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"rewardedView is null, call requestRewardedAd first."];
+            
+        } else {
+            if (![self __showRewarded:YES]) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."];
+            } else {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            }
+        }
+        
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+    }];
+}
+
 - (void)onBannerAd:(GADBannerView *)adView adListener:(CDVAdMobAdsAdListener *)adListener {
     if (self.isBannerShow) {
         [self.commandDelegate runInBackground:^{
@@ -258,6 +298,17 @@
         [self.commandDelegate runInBackground:^{
             if (![self __showInterstitial:YES]) {
                 [adListener interstitialDidFailedToShow:interstitial];
+            }
+        }];
+    }
+}
+
+- (void)onRewardedAd:(GADRewardBasedVideoAd *)rewarded adListener:(CDVAdMobAdsAdListener *)adListener {
+    self.isRewardedAvailable = true;
+    if (self.isRewardedAutoShow) {
+        [self.commandDelegate runInBackground:^{
+            if (![self __showRewarded:YES]) {
+                [adListener rewardedDidFailedToShow:rewarded];
             }
         }];
     }
@@ -297,6 +348,39 @@
     }];
 }
 
+- (void)requestRewardedAd:(CDVInvokedUrlCommand *)command {
+    NSString *callbackId = command.callbackId;
+    NSArray* args = command.arguments;
+    
+    NSUInteger argc = [args count];
+    if (argc >= 1) {
+        NSDictionary* options = [command argumentAtIndex:0 withDefault:[NSNull null]];
+        [self __setOptions:options];
+    }
+    
+    [self.commandDelegate runInBackground:^{
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        isRewardedRequested = true;
+        
+        if (!isRewardedAvailable && rewardedView) {
+            self.rewardedView.delegate = nil;
+            self.rewardedView = nil;
+        }
+        
+        if (isRewardedAvailable) {
+            [adsListener rewardBasedVideoAdDidReceiveAd:rewardedView];
+            
+        } else if (!self.rewardedView) {
+            NSString *_iid = [self __getRewardedId];
+            
+            if (![self __createRewarded:_iid withAdListener:adsListener]) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."];
+            }
+        }
+        
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+    }];
+}
 
 
 - (GADAdSize)__adSizeFromString:(NSString *)string {
@@ -372,6 +456,12 @@
     }
     return _interstitialAdId;
 }
+- (NSString *) __getRewardedId {
+    NSString *_rewardedAdId = rewardedAdId;
+    
+    return _rewardedAdId;
+}
+
 
 #pragma mark Ad Banner logic
 
@@ -390,6 +480,11 @@
     str = [options objectForKey:OPT_INTERSTITIAL_ADID];
     if (str && ![str isEqual:[NSNull null]] && [str length] > 0) {
         interstitialAdId = str;
+    }
+    
+    str = [options objectForKey:OPT_REWARDED_ADID];
+    if (str && ![str isEqual:[NSNull null]] && [str length] > 0) {
+        rewardedAdId = str;
     }
     
     str = [options objectForKey:OPT_AD_SIZE];
@@ -430,6 +525,11 @@
     str = [options objectForKey:OPT_AUTO_SHOW_INTERSTITIAL];
     if (str && ![str isEqual:[NSNull null]]) {
         isInterstitialAutoShow = [str boolValue];
+    }
+    
+    str = [options objectForKey:OPT_AUTO_SHOW_REWARDED];
+    if (str && ![str isEqual:[NSNull null]]) {
+        isRewardedAutoShow = [str boolValue];
     }
     
     str = [options objectForKey:OPT_TAPPX_ID_IOS];
@@ -658,6 +758,71 @@
     return succeeded;
 }
 
+
+- (BOOL) __createRewarded:(NSString *)_iid withAdListener:(CDVAdMobAdsAdListener *) adListener {
+    BOOL succeeded = false;
+    
+    // Clean up the old interstitial...
+    if (self.rewardedView) {
+        self.rewardedView.delegate = nil;
+        self.rewardedView = nil;
+    }
+    
+    
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        //Initialize Google Mobile Ads SDK
+        //note: will this cause an issue if called more than once?
+        [GADMobileAds configureWithApplicationID:publisherId];
+        self.rewardedView = [GADRewardBasedVideoAd sharedInstance] ;
+    });
+    self.rewardedView.delegate = adListener;
+    GADRequest *request = [self __buildAdRequest];
+   
+    if (!request) {
+        succeeded = false;
+        if (self.rewardedView) {
+            [self.rewardedView setDelegate:nil];
+            self.rewardedView = nil;
+        }
+        
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.rewardedView loadRequest:request withAdUnitID:_iid];
+        });
+        succeeded = true;
+        self.isRewardedAvailable = false;
+    }
+    
+    
+    return succeeded;
+}
+
+- (BOOL) __showRewarded:(BOOL)show {
+    BOOL succeeded = false;
+    
+    if (!self.rewardedView) {
+        NSString *_iid = [self __getRewardedId];
+        
+        succeeded = [self __createRewarded:_iid withAdListener:adsListener];
+        isRewardedRequested = true;
+        
+    } else {
+        succeeded = true;
+    }
+    
+    if (self.rewardedView && self.rewardedView.isReady) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.rewardedView presentFromRootViewController:self.viewController];
+            isRewardedRequested = false;
+        });
+    }
+    
+    return succeeded;
+}
+
+
+
+
 - (void)resizeViews {
     // Frame of the main container view that holds the Cordova webview.
     CGRect pr = self.webView.superview.bounds;
@@ -758,8 +923,12 @@
     
     bannerView.delegate = nil;
     bannerView = nil;
+    
     interstitialView.delegate = nil;
     interstitialView = nil;
+    
+    rewardedView.delegate = nil;
+    rewardedView = nil;
     
     adsListener = nil;
     
