@@ -45,7 +45,7 @@
     
     <source-file src="src/android/res/xml/admob.xml" target-dir="res/xml" />
 
-    <preference name="ADMOB_APP_ID" default="[your admob app id]"/>
+    <preference name="ADMOB_APP_ID" />
   </platform>
 
   <!-- ios -->

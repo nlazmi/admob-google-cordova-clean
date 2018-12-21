@@ -5,7 +5,7 @@ This is a fork of the plugin by AppFeel that doesn't take 2% of your impressions
 To install this plugin, follow the [Command-line Interface Guide](http://cordova.apache.org/docs/en/edge/guide_cli_index.md.html#The%20Command-line%20Interface). You can use one of the following command lines:
 
 * `cordova plugin add https://github.com/jamesfdickinson/admob-google-cordova-clean.git --variable ADMOB_APP_ID="123456789"`
-* note: If you add the correct ADMOB_APP_ID after the build you may need to remove the android project and rebuild it.
+* Note: If you add the correct ADMOB_APP_ID after the build you may need to remove the plugin and re-add it as the original value is saved in the plugin folder and overrides the config settings.
 
 ## Change Log ##
 4.4.0
