@@ -30,6 +30,7 @@
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
       <activity android:name="com.google.android.gms.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" android:theme="@android:style/Theme.Translucent" />
+      <meta-data  android:name="com.google.android.gms.ads.APPLICATION_ID"  android:value="$ADMOB_APP_ID"/>
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/*">
@@ -43,6 +44,8 @@
     <source-file src="src/android/AdMobRewardedVideoAdListener.java" target-dir="src/com/appfeel/cordova/admob" />
     
     <source-file src="src/android/res/xml/admob.xml" target-dir="res/xml" />
+
+    <preference name="ADMOB_APP_ID" default="[your admob app id]"/>
   </platform>
 
   <!-- ios -->

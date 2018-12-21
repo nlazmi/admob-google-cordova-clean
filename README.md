@@ -1,5 +1,19 @@
 This is a fork of the plugin by AppFeel that doesn't take 2% of your impressions. Changes were originally made by https://github.com/TheBosZ/admob-google-cordova . But, removed the dependency on another project for Google Admob Frameowork for iOS.
 
+## Quick start ##
+
+To install this plugin, follow the [Command-line Interface Guide](http://cordova.apache.org/docs/en/edge/guide_cli_index.md.html#The%20Command-line%20Interface). You can use one of the following command lines:
+
+* `cordova plugin add https://github.com/jamesfdickinson/admob-google-cordova-clean.git --variable ADMOB_APP_ID="123456789"`
+* note: If you add the correct ADMOB_APP_ID after the build you may need to remove the android project and rebuild it.
+
+## Change Log ##
+4.4.0
+
+- Added required android AndroidManifest.xml meta-data tag.use the variable in the config add your abmob's appid. `<meta-data       android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="[ADMOB_APP_ID]"/>`.  See: https://developers.google.com/admob/android/quick-start
+- MobileAds.initialize(appid) is executed internally as required by the current admob sdk
+
 Cordova AdMob plugin
 ====================
 
@@ -23,23 +37,16 @@ Or
 * iOS, using AdMob SDK for iOS, v7.12.1
 * Android, using Google Play Service for Android, v7.5
 
-
----
-## Demo projects: ##
-- [Intel XDK](https://github.com/appfeel/admob-google-xdk)
-- [Cordova/PhoneGap CLI](https://github.com/appfeel/admob-google-demo)
-- [PhoneGap Build](https://github.com/appfeel/admob-phonegap-build-demo)
-
 ---
 ## Quick start ##
 
 To install this plugin, follow the [Command-line Interface Guide](http://cordova.apache.org/docs/en/edge/guide_cli_index.md.html#The%20Command-line%20Interface). You can use one of the following command lines:
 
-* `cordova plugin add https://github.com/jamesfdickinson/admob-google-cordova-clean.git`
+* `cordova plugin add https://github.com/jamesfdickinson/admob-google-cordova-clean.git --variable ADMOB_APP_ID="123456789"`
 
 To start showing ads, place the following code in your `onDeviceReady` callback. Replace corresponding id's with yours:
 
-*Note: ensure you have a proper [AdMob](https://apps.admob.com/admob/signup) and [tappx](http://www.tappx.com/) accounts and get your publisher id's*.
+*Note: ensure you have a proper [AdMob](https://apps.admob.com/admob/signup) aaccount and get your admob's appid id's*.
 
 ```javascript
     
