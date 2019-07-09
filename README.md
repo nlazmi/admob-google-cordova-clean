@@ -11,7 +11,9 @@ To install this plugin, follow the [Command-line Interface Guide](http://cordova
 4.5.0
 
 -update sdks and dependecies 
+
 -android: https://developers.google.com/admob/android/quick-start
+
 -ios: uses CocoaPods and removed packaged sdk
 
 4.4.0
