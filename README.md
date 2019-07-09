@@ -8,6 +8,12 @@ To install this plugin, follow the [Command-line Interface Guide](http://cordova
 * Note: If you add the correct ADMOB_APP_ID after the build you may need to remove the plugin and re-add it as the original value is saved in the plugin folder and overrides the config settings.
 
 ## Change Log ##
+4.5.0
+
+-update sdks and dependecies 
+-android: https://developers.google.com/admob/android/quick-start
+-ios: uses CocoaPods and removed packaged sdk
+
 4.4.0
 
 - Added required android AndroidManifest.xml meta-data tag.use the variable in the config add your abmob's appid. `<meta-data       android:name="com.google.android.gms.ads.APPLICATION_ID"
