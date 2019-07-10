@@ -38,10 +38,10 @@
       <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     </config-file>
 
-    <!-- <framework src="com.google.android.gms:play-services-ads:+" />
+    <framework src="com.google.android.gms:play-services-ads:+" />
     <framework src="com.google.android.gms:play-services-measurement:+" />
-    <framework src="com.google.android.gms:play-services-measurement-sdk:+" /> -->
-    <framework src="com.google.firebase:firebase-ads:+" />
+    <framework src="com.google.android.gms:play-services-measurement-sdk:+" /> 
+    <!--<framework src="com.google.firebase:firebase-ads:+" />-->
 
 
 
@@ -66,9 +66,9 @@
     <source-file src="src/ios/CDVAdMobAdsAdListener.m" />
 
     <!-- Google AdMob framework -->
-    <!-- <framework src="Google-Mobile-Ads-SDK" type="podspec"  /> -->
-    <framework src="Firebase/Analytics" type="podspec" />
-    <framework src="Firebase/AdMob" type="podspec" />
+    <framework src="Google-Mobile-Ads-SDK" type="podspec"  />
+    <!-- <framework src="Firebase/Analytics" type="podspec" />
+    <framework src="Firebase/AdMob" type="podspec" /> -->
     
   </platform>
 </plugin>

@@ -9,9 +9,9 @@ To install this plugin, follow the [Command-line Interface Guide](http://cordova
 
 ## Change Log ##
 
-4.6.0
+4.6.1
 
-- Use firebase sdk for admob
+- Update sdks and dependecies
 
 4.5.0
 
