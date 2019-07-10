@@ -8,6 +8,11 @@ To install this plugin, follow the [Command-line Interface Guide](http://cordova
 * Note: If you add the correct ADMOB_APP_ID after the build you may need to remove the plugin and re-add it as the original value is saved in the plugin folder and overrides the config settings.
 
 ## Change Log ##
+
+4.6.0
+
+- Use firebase sdk for admob
+
 4.5.0
 
 - Update sdks and dependecies 
