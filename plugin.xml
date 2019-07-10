@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-admob-jimmy" version="4.5.1">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-admob-jimmy" version="4.6.0">
   <description>Google AdMob Ads plugin for Cordova, Phonegap, Ionic/Angular and Intel XDK. Monetize your app with one javascript line. Android SDK v7.5, iOS SDK v7.3.1. With support for tappx and auto-detect internet connection.</description>
   <name>AdMob Google Ads - Clean</name>
   <author href="https://github.com/jamesfdickinson/admob-google-cordova-clean">jamesfdickinson</author>
@@ -38,9 +38,12 @@
       <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     </config-file>
 
-    <framework src="com.google.android.gms:play-services-ads:+" />
+    <!-- <framework src="com.google.android.gms:play-services-ads:+" />
     <framework src="com.google.android.gms:play-services-measurement:+" />
-    <framework src="com.google.android.gms:play-services-measurement-sdk:+" />
+    <framework src="com.google.android.gms:play-services-measurement-sdk:+" /> -->
+    <framework src="com.google.firebase:firebase-ads:+" />
+
+
 
     <source-file src="src/android/AdMobAds.java" target-dir="src/com/appfeel/cordova/admob" />
     <source-file src="src/android/AdMobAdsAdListener.java" target-dir="src/com/appfeel/cordova/admob" />
@@ -63,6 +66,9 @@
     <source-file src="src/ios/CDVAdMobAdsAdListener.m" />
 
     <!-- Google AdMob framework -->
-    <framework src="Google-Mobile-Ads-SDK" type="podspec" spec="~> 1.2.0" />
+    <!-- <framework src="Google-Mobile-Ads-SDK" type="podspec"  /> -->
+    <framework src="Firebase/Analytics" type="podspec" />
+    <framework src="Firebase/AdMob" type="podspec" />
+    
   </platform>
 </plugin>
