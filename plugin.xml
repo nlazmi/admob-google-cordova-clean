@@ -66,9 +66,16 @@
     <source-file src="src/ios/CDVAdMobAdsAdListener.m" />
 
     <!-- Google AdMob framework -->
-    <framework src="Google-Mobile-Ads-SDK" type="podspec"  />
+    <!-- <framework src="Google-Mobile-Ads-SDK" type="podspec"  /> -->
     <!-- <framework src="Firebase/Analytics" type="podspec" />
     <framework src="Firebase/AdMob" type="podspec" /> -->
-    
+    <podspec>
+            <config>
+                <source url="https://github.com/CocoaPods/Specs.git"/>
+            </config>
+            <pods use-frameworks="true">
+                <pod name="Google-Mobile-Ads-SDK"  />
+            </pods>
+        </podspec>
   </platform>
 </plugin>
