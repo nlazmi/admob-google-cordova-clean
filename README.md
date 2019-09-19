@@ -9,6 +9,10 @@ To install this plugin, follow the [Command-line Interface Guide](http://cordova
 
 ## Change Log ##
 
+4.7.0
+
+- Update podspec to new format
+
 4.6.1
 
 - Update sdks and dependecies
