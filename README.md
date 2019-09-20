@@ -1,4 +1,5 @@
-This is a fork of the plugin by AppFeel that doesn't take 2% of your impressions. Changes were originally made by https://github.com/TheBosZ/admob-google-cordova . But, removed the dependency on another project for Google Admob Frameowork for iOS.
+# cordova-admob-jimmy
+A Cordova AdMob plugin used for Android and iOS.  It is free, with no ad sharing or remote code.  It gets updated as needed to support the apps I develope and maintain.  There may be other plugins with more features, but I can depend on this code to fullful my needs and not crash my code.
 
 ## Quick start ##
 
