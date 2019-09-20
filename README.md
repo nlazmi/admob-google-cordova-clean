@@ -1,5 +1,5 @@
 # cordova-admob-jimmy
-A Cordova AdMob plugin used for Android and iOS.  It is free, with no ad sharing or remote code.  It gets updated as needed to support the apps I develope and maintain.  There may be other plugins with more features, but I can depend on this code to fullful my needs and not crash my code.
+A Cordova AdMob plugin used for Android and iOS.  It is free, with no ad sharing or remote code.  It gets updated as needed to support the apps I develop and maintain.  There may be other plugins with more features, but I can depend on this code to fullful my needs and not crash my code.
 
 ## Quick start ##
 
