@@ -332,31 +332,27 @@ public class AdMobAds extends CordovaPlugin {
         }
     }
     
-    private void initializeMobileAds(String _aid) {
+    private void initializeMobileAds() {
+        String __pid = getPublisherId();
 		if(!isMobileAdsInitialized) {
-			MobileAds.initialize(cordova.getActivity(), _aid);
+			MobileAds.initialize(cordova.getActivity(), __pid);
 			isMobileAdsInitialized = true;
 		}
 	}
 
     private PluginResult executeCreateBannerView(JSONObject options, final CallbackContext callbackContext) {
         this.setOptions(options);
-        String __aid = getAppId();
+
         String __pid = getPublisherId();
-        if (__aid.length() == 0) {
-            return new PluginResult(Status.ERROR, "appId is missing");
-        }
         if (__pid.length() == 0) {
             return new PluginResult(Status.ERROR, "bannerAdId is missing");
         }
 
-        final String _aid = __aid;
         final String _pid = __pid;
 
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-				initializeMobileAds(_aid);
                 createBannerView(_pid, bannerListener);
                 callbackContext.success();
             }
@@ -366,7 +362,7 @@ public class AdMobAds extends CordovaPlugin {
 
     private void createBannerView(String _pid, AdMobAdsAdListener adListener) {
         boolean isTappx = _pid.equals(tappxId);
-
+        initializeMobileAds();
         if (adView != null && !adView.getAdUnitId().equals(_pid)) {
             if (adView.getParent() != null) {
                 ((ViewGroup) adView.getParent()).removeView(adView);
@@ -575,23 +571,20 @@ public class AdMobAds extends CordovaPlugin {
 
     private PluginResult executeCreateInterstitialView(JSONObject options, final CallbackContext callbackContext) {
         this.setOptions(options);
-        String __aid = getAppId();
+
         String __iid = getInterstitialId();
 
-        if (__aid.length() == 0) {
-            return new PluginResult(Status.ERROR, "appId is missing");
-        }
         if (__iid.length() == 0) {
             return new PluginResult(Status.ERROR, "interstitialAdId is missing");
         }
 
-        final String _aid = __aid;
+
         final String _iid = __iid;
         
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-				initializeMobileAds(_aid);
+
                 createInterstitialView(_iid, interstitialListener);
                 callbackContext.success();
             }
@@ -600,6 +593,8 @@ public class AdMobAds extends CordovaPlugin {
     }
 
     private void createInterstitialView(String _iid, AdMobAdsAdListener adListener) {
+        initializeMobileAds();
+
         interstitialAd = new InterstitialAd(cordova.getActivity());
         interstitialAd.setAdUnitId(_iid);
        
@@ -656,7 +651,6 @@ public class AdMobAds extends CordovaPlugin {
 
     private PluginResult executeCreateRewardedView(JSONObject options, final CallbackContext callbackContext) {
         this.setOptions(options);
-        String __pid = getPublisherId();
         String __iid = getRewardedId();
 
         if (__iid.length() == 0) {
@@ -667,6 +661,7 @@ public class AdMobAds extends CordovaPlugin {
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
                 createRewardedView(_iid, rewardedListener);
                 callbackContext.success();
             }
@@ -675,14 +670,10 @@ public class AdMobAds extends CordovaPlugin {
     }
 
     private void createRewardedView(String _iid, AdMobRewardedVideoAdListener adListener) {
-        String __pid = getPublisherId();
-
-        //note: will this cause an issue if called more than once?
-        MobileAds.initialize(cordova.getActivity(), __pid);
+        initializeMobileAds();
 
         rewardedAd = MobileAds.getRewardedVideoAdInstance(cordova.getActivity());
-
-
+        
         rewardedAd.setRewardedVideoAdListener(adListener);
         rewardedAd.loadAd(_iid,buildAdRequest());
     }
