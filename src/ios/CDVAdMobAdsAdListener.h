@@ -29,12 +29,12 @@
 #import <GoogleMobileAds/GADBannerViewDelegate.h>
 #import <GoogleMobileAds/GADInterstitialDelegate.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
-#import <GoogleMobileAds/GADRewardBasedVideoAdDelegate.h>
+#import <GoogleMobileAds/GADRewardedAdDelegate.h>
 #import <GoogleMobileAds/GADExtras.h>
 
 @class CDVAdMobAds;
 
-@interface CDVAdMobAdsAdListener : NSObject <GADRewardBasedVideoAdDelegate,GADBannerViewDelegate, GADInterstitialDelegate> {
+@interface CDVAdMobAdsAdListener : NSObject <GADRewardedAdDelegate,GADBannerViewDelegate, GADInterstitialDelegate> {
     
 }
 
@@ -44,6 +44,6 @@
 - (instancetype)initWithAdMobAds: (CDVAdMobAds *)originalAdMobAds ;
 - (void)adViewDidFailedToShow:(GADBannerView *)view;
 - (void)interstitialDidFailedToShow:(GADInterstitial *) interstitial;
-- (void)rewardedDidFailedToShow:(GADRewardBasedVideoAd *) rewarded;
-
+- (void)rewardedDidFailedToShow:(GADRewardedAd *) rewarded;
+- (void)rewardAdDidReceiveAd:(GADRewardedAd *) rewarded;
 @end

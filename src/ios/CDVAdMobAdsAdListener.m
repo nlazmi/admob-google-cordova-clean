@@ -28,7 +28,7 @@
 #include "CDVAdMobAds.h"
 #include "CDVAdMobAdsAdListener.h"
 
-@interface CDVAdMobAdsAdListener()
+@interface CDVAdMobAdsAdListener() 
 - (NSString *) __getErrorReason:(NSInteger) errorCode;
 @property( assign) NSInteger rewardAmount;
 @property( assign) NSString* rewardType;
@@ -184,7 +184,7 @@
 
 #pragma mark -
 #pragma mark GADRewardBasedVideoAdDelegate implementation
-
+/*
 // Sent when an interstitial ad request succeeded.  Show it at the next
 // transition point in your application such as when transitioning between view
 // controllers.
@@ -280,6 +280,91 @@
         adMobAds.isRewardedAvailable = false;
     }];
 }
+#pragma mark -
+ */
+#pragma mark GADRewardedAdDelegate implementation
+
+/// onAdLoaded
+- (void)rewardAdDidReceiveAd:(GADRewardedAd *)rewarded {
+    if (adMobAds.rewardedView) {
+        [adMobAds onRewardedAd:rewarded adListener:self];
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [adMobAds.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdLoaded, { 'adType' : 'rewarded' }); }, 1);"];
+        }];
+    }
+}
+- (void)rewardedDidFailedToShow:(GADRewardedAd *) rewarded {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSString *jsString =
+        @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdFailedToLoad, "
+        @"{ 'adType' : 'rewarded', 'error': %ld, 'reason': '%@' }); }, 1);";
+        [adMobAds.commandDelegate evalJs:[NSString stringWithFormat:jsString,
+                                          0,
+                                          @"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."]];
+    }];
+    
+}
+/// Tells the delegate that the user earned a reward.
+- (void)rewardedAd:(GADRewardedAd *)rewardedAd userDidEarnReward:(GADAdReward *)reward {
+  // TODO: Reward the user.
+  NSLog(@"rewardedAd:userDidEarnReward:");
+    self.rewardAmount = [reward.amount integerValue];
+    self.rewardType = reward.type;
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSString *jsString =
+        [NSString stringWithFormat:
+         @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdRewarded, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %ld }); }, 1);"
+         ,self.rewardType
+         ,(long)self.rewardAmount
+         ];
+        [adMobAds.commandDelegate evalJs:jsString];
+        adMobAds.isRewardedAvailable = false;
+    }];
+}
+
+/// Tells the delegate that the rewarded ad was presented.
+- (void)rewardedAdDidPresent:(GADRewardedAd *)rewardedAd {
+  NSLog(@"rewardedAdDidPresent:");
+    if (adMobAds.isRewardedAvailable) {
+           [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+               [adMobAds.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdOpened, { 'adType' : 'rewarded' }); }, 1);"];
+           }];
+           adMobAds.isRewardedAvailable = false;
+           self.rewardAmount = 0;
+           self.rewardType = @"";
+       }
+}
+
+/// Tells the delegate that the rewarded ad failed to present.
+- (void)rewardedAd:(GADRewardedAd *)rewardedAd didFailToPresentWithError:(NSError *)error {
+  [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+      NSString *jsString =
+      @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdFailedToLoad, "
+      @"{ 'adType' : 'rewarded', 'error': %ld, 'reason': '%@' }); }, 1);";
+      [adMobAds.commandDelegate evalJs:[NSString stringWithFormat:jsString,
+                                        0,
+                                        @"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."]];
+  }];
+}
+
+/// Tells the delegate that the rewarded ad was dismissed.
+- (void)rewardedAdDidDismiss:(GADRewardedAd *)rewardedAd {
+  NSLog(@"rewardedAdDidDismiss:");
+     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        
+         NSString *jsString =
+         [NSString stringWithFormat:
+          @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %ld }); }, 1);"
+          ,self.rewardType
+          ,(long)self.rewardAmount
+          ];
+          [adMobAds.commandDelegate evalJs:jsString];
+     }];
+     adMobAds.isRewardedAvailable = false;
+    
+}
+
 #pragma mark -
 #pragma mark ErrorCodes
      

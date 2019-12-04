@@ -29,11 +29,14 @@
 #import "CDVAdMobAds.h"
 #import "MainViewController.h"
 
-@interface CDVAdMobAds()
+@interface CDVAdMobAds() <GADRewardedAdDelegate>
 
 @property (assign) BOOL isBannerRequested;
 @property (assign) BOOL isInterstitialRequested;
 @property (assign) BOOL isRewardedRequested;
+
+@property( assign) NSInteger rewardAmount;
+@property( assign) NSString* rewardType;
 
 - (void) __setOptions:(NSDictionary*) options;
 - (BOOL) __createBanner:(NSString *)_pid withAdListener:(CDVAdMobAdsAdListener *)adListener isTappx:(BOOL)isTappx;
@@ -92,6 +95,7 @@
 
 @synthesize isBannerVisible, isBannerInitialized, isBannerRequested, isInterstitialRequested, isRewardedRequested;
 @synthesize isBannerShow, isBannerAutoShow, isInterstitialAutoShow,isRewardedAutoShow, hasTappx;
+@synthesize  rewardAmount,rewardType ;
 
 #pragma mark Cordova JS bridge
 
@@ -133,7 +137,8 @@
     
     adsListener = [[CDVAdMobAdsAdListener alloc] initWithAdMobAds:self];
     
-    
+    rewardAmount = 0;
+    rewardType = @"";
     
     srand((unsigned)time(NULL));
 }
@@ -261,7 +266,7 @@
         CDVPluginResult *pluginResult;
         
         if (!isRewardedAvailable && rewardedView) {
-            self.rewardedView.delegate = nil;
+            ////self.rewardedView.delegate = nil;
             self.rewardedView = nil;
         }
         
@@ -303,12 +308,12 @@
     }
 }
 
-- (void)onRewardedAd:(GADRewardBasedVideoAd *)rewarded adListener:(CDVAdMobAdsAdListener *)adListener {
+- (void)onRewardedAd:(GADRewardedAd *)rewarded adListener:(CDVAdMobAdsAdListener *)adListener {
     self.isRewardedAvailable = true;
     if (self.isRewardedAutoShow) {
         [self.commandDelegate runInBackground:^{
             if (![self __showRewarded:YES]) {
-                [adListener rewardedDidFailedToShow:rewarded];
+                [self rewardedDidFailedToShow:rewarded];
             }
         }];
     }
@@ -363,17 +368,17 @@
         isRewardedRequested = true;
         
         if (!isRewardedAvailable && rewardedView) {
-            self.rewardedView.delegate = nil;
+            ////self.rewardedView.delegate = nil;
             self.rewardedView = nil;
         }
         
         if (isRewardedAvailable) {
-            [adsListener rewardBasedVideoAdDidReceiveAd:rewardedView];
+              [adsListener rewardAdDidReceiveAd:rewardedView];
             
         } else if (!self.rewardedView) {
             NSString *_iid = [self __getRewardedId];
             
-            if (![self __createRewarded:_iid withAdListener:adsListener]) {
+            if (![self __createRewarded:_iid withAdListener:self]) {
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."];
             }
         }
@@ -762,33 +767,41 @@
 - (BOOL) __createRewarded:(NSString *)_iid withAdListener:(CDVAdMobAdsAdListener *) adListener {
     BOOL succeeded = false;
     
-    // Clean up the old interstitial...
+    // Clean up the old rewardedAd...
     if (self.rewardedView) {
-        self.rewardedView.delegate = nil;
+        ////self.rewardedView.delegate = nil;
         self.rewardedView = nil;
     }
     
     
-    dispatch_sync(dispatch_get_main_queue(), ^{
+   // dispatch_sync(dispatch_get_main_queue(), ^{
         //Initialize Google Mobile Ads SDK
         //note: will this cause an issue if called more than once?
-        [GADMobileAds configureWithApplicationID:publisherId];
-        self.rewardedView = [GADRewardBasedVideoAd sharedInstance] ;
-    });
-    self.rewardedView.delegate = adListener;
-    GADRequest *request = [self __buildAdRequest];
+       GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[ @"52338ec92deaa332f0af451c672602f0" ];
+        self.rewardedView = [[GADRewardedAd alloc]  initWithAdUnitID:_iid];
+    //});
+    ////self.rewardedView.delegate = adListener;
+    GADRequest *request = [GADRequest request];
    
     if (!request) {
         succeeded = false;
         if (self.rewardedView) {
-            [self.rewardedView setDelegate:nil];
             self.rewardedView = nil;
         }
         
     } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.rewardedView loadRequest:request withAdUnitID:_iid];
-        });
+       // dispatch_async(dispatch_get_main_queue(), ^{
+            [self.rewardedView loadRequest:request   completionHandler:^(GADRequestError * _Nullable error) {
+                if (error) {
+                  // Handle ad failed to load case.
+                } else {
+                  // Ad successfully loaded.
+                    self.isRewardedAvailable = true;
+                    //todo: send even ad loaded
+                    [self rewardAdDidReceiveAd:self.rewardedView];
+                }
+            }];
+       // });
         succeeded = true;
         self.isRewardedAvailable = false;
     }
@@ -811,16 +824,100 @@
     }
     
     if (self.rewardedView && self.rewardedView.isReady) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.rewardedView presentFromRootViewController:self.viewController];
+        //dispatch_async(dispatch_get_main_queue(), ^{
+            [self.rewardedView presentFromRootViewController:self.viewController delegate:self];
             isRewardedRequested = false;
-        });
+        //});
     }
     
     return succeeded;
 }
 
+#pragma mark GADRewardedAdDelegate implementation
 
+/// onAdLoaded
+- (void)rewardAdDidReceiveAd:(GADRewardedAd *)rewarded {
+    if (self.rewardedView) {
+        [self onRewardedAd:rewarded adListener:self];
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [self.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdLoaded, { 'adType' : 'rewarded' }); }, 1);"];
+        }];
+    }
+}
+- (void)rewardedDidFailedToShow:(GADRewardedAd *) rewarded {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSString *jsString =
+        @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdFailedToLoad, "
+        @"{ 'adType' : 'rewarded', 'error': %ld, 'reason': '%@' }); }, 1);";
+        [self.commandDelegate evalJs:[NSString stringWithFormat:jsString,
+                                          0,
+                                          @"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."]];
+   }];
+    
+}
+
+/// Tells the delegate that the user earned a reward.
+- (void)rewardedAd:(GADRewardedAd *)rewardedAd userDidEarnReward:(GADAdReward *)reward {
+  //Reward the user.
+  NSLog(@"rewardedAd:userDidEarnReward:");
+    self.rewardAmount = [reward.amount integerValue];
+    self.rewardType = reward.type;
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        NSString *jsString =
+        [NSString stringWithFormat:
+         @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdRewarded, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %ld }); }, 1);"
+         ,self.rewardType
+         ,(long)self.rewardAmount
+         ];
+        [self.commandDelegate evalJs:jsString];
+        self.isRewardedAvailable = false;
+    }];
+}
+
+/// Tells the delegate that the rewarded ad was presented.
+- (void)rewardedAdDidPresent:(GADRewardedAd *)rewardedAd {
+  NSLog(@"rewardedAdDidPresent:");
+    if (self.isRewardedAvailable) {
+           [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+               [self.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdOpened, { 'adType' : 'rewarded' }); }, 1);"];
+           }];
+           self.isRewardedAvailable = false;
+           self.rewardAmount = 0;
+           self.rewardType = @"";
+       }
+}
+
+/// Tells the delegate that the rewarded ad failed to present.
+- (void)rewardedAd:(GADRewardedAd *)rewardedAd didFailToPresentWithError:(NSError *)error {
+  [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+      NSString *jsString =
+      @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdFailedToLoad, "
+      @"{ 'adType' : 'rewarded', 'error': %ld, 'reason': '%@' }); }, 1);";
+      [self.commandDelegate evalJs:[NSString stringWithFormat:jsString,
+                                        0,
+                                        @"Advertising tracking may be disabled. To get test ads on this device, enable advertising tracking."]];
+  }];
+}
+
+/// Tells the delegate that the rewarded ad was dismissed.
+- (void)rewardedAdDidDismiss:(GADRewardedAd *)rewardedAd {
+  NSLog(@"rewardedAdDidDismiss:");
+     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        
+         NSString *jsString =
+         [NSString stringWithFormat:
+          @"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdClosed, { 'adType' : 'rewarded','rewardType': '%@','rewardAmount': %ld }); }, 1);"
+          ,self.rewardType
+          ,(long)self.rewardAmount
+          ];
+          [self.commandDelegate evalJs:jsString];
+     }];
+     self.isRewardedAvailable = false;
+    
+}
+
+#pragma mark -
 
 
 - (void)resizeViews {
@@ -927,7 +1024,7 @@
     interstitialView.delegate = nil;
     interstitialView = nil;
     
-    rewardedView.delegate = nil;
+    ////rewardedView.delegate = nil;
     rewardedView = nil;
     
     adsListener = nil;

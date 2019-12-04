@@ -74,7 +74,9 @@
                 <source url="https://github.com/CocoaPods/Specs.git"/>
             </config>
             <pods>
-                <pod name="Google-Mobile-Ads-SDK"  />
+                <!-- <pod name="Google-Mobile-Ads-SDK"  />-->
+                <pod name="Firebase/Analytics"  />
+                <pod name="Firebase/AdMob"  />
             </pods>
         </podspec>
   </platform>

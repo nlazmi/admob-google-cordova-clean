@@ -33,7 +33,7 @@
 #import <GoogleMobileAds/GADInterstitial.h>
 #import <GoogleMobileAds/GADBannerViewDelegate.h>
 #import <GoogleMobileAds/GADInterstitialDelegate.h>
-#import <GoogleMobileAds/GADRewardBasedVideoAdDelegate.h>
+#import <GoogleMobileAds/GADRewardedAdDelegate.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 #import "CDVAdMobAdsAdListener.h"
 
@@ -42,8 +42,7 @@
 
 @class GADBannerView;
 @class GADInterstitial;
-@class GADRewardBasedVideoAd;
-@class CDVAdMobAdsAdListener;
+@class GADRewardAd;
 @class CDVAdMobAdsAdListener;
 
 #pragma mark AdMobAds Plugin
@@ -56,7 +55,7 @@
 
 @property (nonatomic, retain) GADBannerView *bannerView;
 @property (nonatomic, retain) GADInterstitial *interstitialView;
-@property (nonatomic, retain) GADRewardBasedVideoAd *rewardedView;
+@property (nonatomic, retain) GADRewardedAd *rewardedView;
 @property (nonatomic, retain) CDVAdMobAdsAdListener *adsListener;
 
 @property (nonatomic, retain) NSString* publisherId;
@@ -95,6 +94,6 @@
 
 - (void)onBannerAd:(GADBannerView *)adView adListener:(CDVAdMobAdsAdListener *)adListener ;
 - (void)onInterstitialAd:(GADInterstitial *)interstitial adListener:(CDVAdMobAdsAdListener *)adListener;
-- (void)onRewardedAd:(GADRewardBasedVideoAd *)rewarded adListener:(CDVAdMobAdsAdListener *)adListener;
+- (void)onRewardedAd:(GADRewardedAd *)rewarded adListener:(CDVAdMobAdsAdListener *)adListener;
 
 @end
