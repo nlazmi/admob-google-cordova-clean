@@ -2,19 +2,19 @@
  admob.js
  Copyright 2014 AppFeel. All rights reserved.
  http://www.appfeel.com
-
+	
  AdMobAds Cordova Plugin (cordova-admob)
-
+	
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to
  deal in the Software without restriction, including without limitation the
  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  sell copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
-
+	
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
-
+	
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,14 +29,14 @@ var admob = window.admob || {};
  * This enum represents appfeel-cordova-admob plugin events
  */
 admob.events = {
-  onAdLoaded: "appfeel.cordova.admob.onAdLoaded",
-  onAdFailedToLoad: "appfeel.cordova.admob.onAdFailedToLoad",
-  onAdOpened: "appfeel.cordova.admob.onAdOpened",
-  onAdLeftApplication: "appfeel.cordova.admob.onAdLeftApplication",
-  onAdClosed: "appfeel.cordova.admob.onAdClosed",
-  onAdRewarded: "appfeel.cordova.admob.onAdRewarded", 
-  onAdStarted: "appfeel.cordova.admob.onAdStarted",
-  onInAppPurchaseRequested: "appfeel.cordova.admob.onInAppPurchaseRequested",
+	onAdLoaded: "appfeel.cordova.admob.onAdLoaded",
+	onAdFailedToLoad: "appfeel.cordova.admob.onAdFailedToLoad",
+	onAdOpened: "appfeel.cordova.admob.onAdOpened",
+	onAdLeftApplication: "appfeel.cordova.admob.onAdLeftApplication",
+	onAdClosed: "appfeel.cordova.admob.onAdClosed",
+	onAdRewarded: "appfeel.cordova.admob.onAdRewarded",
+	onAdStarted: "appfeel.cordova.admob.onAdStarted",
+	onInAppPurchaseRequested: "appfeel.cordova.admob.onInAppPurchaseRequested",
 };
 
 /**
@@ -45,40 +45,42 @@ admob.events = {
  * @const
  */
 admob.AD_SIZE = {
-  BANNER: 'BANNER',
-  IAB_MRECT: 'IAB_MRECT',
-  IAB_BANNER: 'IAB_BANNER',
-  IAB_LEADERBOARD: 'IAB_LEADERBOARD',
-  SMART_BANNER: 'SMART_BANNER'
+	BANNER: 'BANNER',
+	IAB_MRECT: 'IAB_MRECT',
+	IAB_BANNER: 'IAB_BANNER',
+	IAB_LEADERBOARD: 'IAB_LEADERBOARD',
+	SMART_BANNER: 'SMART_BANNER'
 };
 
 admob.AD_TYPE = {
-  BANNER: 'banner',
-  INTERSTITIAL: 'interstitial',
-  REWARDED: 'rewarded'
+	BANNER: 'banner',
+	INTERSTITIAL: 'interstitial',
+	REWARDED: 'rewarded',
+	APP_OPEN: 'app_open'
 };
 
 admob.PURCHASE_RESOLUTION = {
-  RESOLUTION_CANCELED: 2,
-  RESOLUTION_FAILURE: 0,
-  RESOLUTION_INVALID_PRODUCT: 3,
-  RESOLUTION_SUCCESS: 1
+	RESOLUTION_CANCELED: 2,
+	RESOLUTION_FAILURE: 0,
+	RESOLUTION_INVALID_PRODUCT: 3,
+	RESOLUTION_SUCCESS: 1
 };
 
 // This is not used by the plugin, it is just a helper to show how options are specified and their default values
 admob.options = {
-  appId: "",
-  bannerAdId: "",
-  interstitialAdId: "",
-  adSize: admob.AD_SIZE.SMART_BANNER,
-  bannerAtTop: false,
-  overlap: false,
-  offsetStatusBar: false,
-  isTesting: false,
-  adExtras: {},
-  autoShowBanner: true,
-  autoShowInterstitial: true,
-  autoShowRewarded: false
+	appId: "",
+	bannerAdId: "",
+	interstitialAdId: "",
+	appOpenAdId: "",
+	adSize: admob.AD_SIZE.SMART_BANNER,
+	bannerAtTop: false,
+	overlap: false,
+	offsetStatusBar: false,
+	isTesting: false,
+	adExtras: {},
+	autoShowBanner: true,
+	autoShowInterstitial: true,
+	autoShowRewarded: false
 };
 
 /**
@@ -88,27 +90,27 @@ admob.options = {
  * @param {function()} failureCallback Callback on fail
  */
 admob.setOptions = function (options, successCallback, failureCallback) {
-  if (typeof options === 'function') {
-    failureCallback = successCallback;
-    successCallback = options;
-    options = undefined;
-  }
-  
-  // Migrate publisherId => bannerAdId
-  if(typeof options === 'object' && options.publisherId != undefined) {
-	  options.bannerAdId = options.publisherId;
-  }
+	if (typeof options === 'function') {
+		failureCallback = successCallback;
+		successCallback = options;
+		options = undefined;
+	}
 
-  options = options || admob.DEFAULT_OPTIONS;
+	// Migrate publisherId => bannerAdId
+	if (typeof options === 'object' && options.publisherId != undefined) {
+		options.bannerAdId = options.publisherId;
+	}
 
-  if (typeof options === 'object') {
-    cordova.exec(successCallback, failureCallback, 'AdMobAds', 'setOptions', [options]);
+	options = options || admob.DEFAULT_OPTIONS;
 
-  } else {
-    if (typeof failureCallback === 'function') {
-      failureCallback('options.appId should be specified.');
-    }
-  }
+	if (typeof options === 'object') {
+		cordova.exec(successCallback, failureCallback, 'AdMobAds', 'setOptions', [options]);
+
+	} else {
+		if (typeof failureCallback === 'function') {
+			failureCallback('options.appId should be specified.');
+		}
+	}
 };
 
 /**
@@ -119,13 +121,13 @@ admob.setOptions = function (options, successCallback, failureCallback) {
  * @param {function()} failureCallback The function to call if create banner  was unsuccessful.
  */
 admob.createBannerView = function (options, successCallback, failureCallback) {
-  if (typeof options === 'function') {
-    failureCallback = successCallback;
-    successCallback = options;
-    options = undefined;
-  }
-  options = options || {};
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'createBannerView', [options]);
+	if (typeof options === 'function') {
+		failureCallback = successCallback;
+		successCallback = options;
+		options = undefined;
+	}
+	options = options || {};
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'createBannerView', [options]);
 };
 
 /*
@@ -136,15 +138,15 @@ admob.createBannerView = function (options, successCallback, failureCallback) {
  * @param {function()} failureCallback The function to call if the ad failed to be shown.
  */
 admob.showBannerAd = function (show, successCallback, failureCallback) {
-  if (show === undefined) {
-    show = true;
+	if (show === undefined) {
+		show = true;
 
-  } else if (typeof show === 'function') {
-    failureCallback = successCallback;
-    successCallback = show;
-    show = true;
-  }
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'showBannerAd', [show]);
+	} else if (typeof show === 'function') {
+		failureCallback = successCallback;
+		successCallback = show;
+		show = true;
+	}
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'showBannerAd', [show]);
 };
 
 /**
@@ -153,7 +155,7 @@ admob.showBannerAd = function (show, successCallback, failureCallback) {
  * @param {function()} failureCallback The function to call if failed to destroy view.
  */
 admob.destroyBannerView = function (successCallback, failureCallback) {
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'destroyBannerView', []);
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'destroyBannerView', []);
 };
 
 /**
@@ -164,13 +166,13 @@ admob.destroyBannerView = function (successCallback, failureCallback) {
  * @param {function()} failureCallback The function to call if an ad failed to be requested.
  */
 admob.requestInterstitialAd = function (options, successCallback, failureCallback) {
-  if (typeof options === 'function') {
-    failureCallback = successCallback;
-    successCallback = options;
-    options = undefined;
-  }
-  options = options || {};
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'requestInterstitialAd', [options]);
+	if (typeof options === 'function') {
+		failureCallback = successCallback;
+		successCallback = options;
+		options = undefined;
+	}
+	options = options || {};
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'requestInterstitialAd', [options]);
 };
 
 /**
@@ -180,7 +182,7 @@ admob.requestInterstitialAd = function (options, successCallback, failureCallbac
  * @param {function()} failureCallback The function to call if the ad failed to be shown.
  */
 admob.showInterstitialAd = function (successCallback, failureCallback) {
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'showInterstitialAd', []);
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'showInterstitialAd', []);
 };
 
 /**
@@ -191,13 +193,13 @@ admob.showInterstitialAd = function (successCallback, failureCallback) {
  * @param {function()} failureCallback The function to call if an ad failed to be requested.
  */
 admob.requestRewardedAd = function (options, successCallback, failureCallback) {
-  if (typeof options === 'function') {
-    failureCallback = successCallback;
-    successCallback = options;
-    options = undefined;
-  }
-  options = options || {};
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'requestRewardedAd', [options]);
+	if (typeof options === 'function') {
+		failureCallback = successCallback;
+		successCallback = options;
+		options = undefined;
+	}
+	options = options || {};
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'requestRewardedAd', [options]);
 };
 
 /**
@@ -207,9 +209,24 @@ admob.requestRewardedAd = function (options, successCallback, failureCallback) {
  * @param {function()} failureCallback The function to call if the ad failed to be shown.
  */
 admob.showRewardedAd = function (successCallback, failureCallback) {
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'showRewardedAd', []);
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'showRewardedAd', []);
 };
 
+
+admob.requestAppOpenAd = function (options, successCallback, failureCallback) {
+	if (typeof options === 'function') {
+		failureCallback = successCallback;
+		successCallback = options;
+		options = undefined;
+	}
+
+	options = options || {};
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'requestAppOpenAd', [options]);
+};
+
+admob.showAppOpenAd = function (successCallback, failureCallback) {
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'showAppOpenAd', [])
+};
 
 
 /**
@@ -222,12 +239,12 @@ admob.showRewardedAd = function (successCallback, failureCallback) {
  * @param {function()} failureCallback The function to call if the ad failed to be shown.
  */
 admob.recordResolution = function (purchaseId, resolution, successCallback, failureCallback) {
-  if (purchaseId === undefined || resolution === undefined) {
-    if (typeof failureCallback === 'function') {
-      failureCallback('purchaseId and resolution should be specified.');
-    }
-  }
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'recordResolution', [purchaseId, resolution]);
+	if (purchaseId === undefined || resolution === undefined) {
+		if (typeof failureCallback === 'function') {
+			failureCallback('purchaseId and resolution should be specified.');
+		}
+	}
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'recordResolution', [purchaseId, resolution]);
 };
 
 /**
@@ -240,17 +257,17 @@ admob.recordResolution = function (purchaseId, resolution, successCallback, fail
  * @param {function()} failureCallback      The function to call if the ad failed to be shown.
  */
 admob.recordPlayBillingResolution = function (purchaseId, billingResponseCode, successCallback, failureCallback) {
-  if (purchaseId === undefined || billingResponseCode === undefined) {
-    if (typeof failureCallback === 'function') {
-      failureCallback('purchaseId and billingResponseCode should be specified.');
-    }
-  }
-  cordova.exec(successCallback, failureCallback, 'AdMobAds', 'recordResolution', [purchaseId, billingResponseCode]);
+	if (purchaseId === undefined || billingResponseCode === undefined) {
+		if (typeof failureCallback === 'function') {
+			failureCallback('purchaseId and billingResponseCode should be specified.');
+		}
+	}
+	cordova.exec(successCallback, failureCallback, 'AdMobAds', 'recordResolution', [purchaseId, billingResponseCode]);
 };
 
 if (typeof module !== 'undefined') {
-  // Export admob
-  module.exports = admob;
+	// Export admob
+	module.exports = admob;
 }
 
 window.admob = admob;
