@@ -34,7 +34,7 @@
 
 @class CDVAdMobAds;
 
-@interface CDVAdMobAdsAdListener : NSObject <GADRewardedAdDelegate,GADBannerViewDelegate, GADInterstitialDelegate> {
+@interface CDVAdMobAdsAdListener : NSObject <GADRewardedAdDelegate,GADBannerViewDelegate, GADInterstitialDelegate, GADFullScreenPresentingAd> {
     
 }
 
@@ -46,4 +46,5 @@
 - (void)interstitialDidFailedToShow:(GADInterstitial *) interstitial;
 - (void)rewardedDidFailedToShow:(GADRewardedAd *) rewarded;
 - (void)rewardAdDidReceiveAd:(GADRewardedAd *) rewarded;
+- (void)appOpenDidReceiveAd:(GADAppOpenAd *)appOpenAd;
 @end

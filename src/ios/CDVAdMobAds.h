@@ -44,6 +44,7 @@
 @class GADInterstitial;
 @class GADRewardAd;
 @class CDVAdMobAdsAdListener;
+@class GADAppOpenAd;
 
 #pragma mark AdMobAds Plugin
 
@@ -52,15 +53,18 @@
 
 @property (assign) BOOL isInterstitialAvailable;
 @property (assign) BOOL isRewardedAvailable;
+@property (assign) BOOL isAppOpenAvailable;
 
 @property (nonatomic, retain) GADBannerView *bannerView;
 @property (nonatomic, retain) GADInterstitial *interstitialView;
 @property (nonatomic, retain) GADRewardedAd *rewardedView;
+@property (nonatomic, retain) GADAppOpenAd* appOpenAd;
 @property (nonatomic, retain) CDVAdMobAdsAdListener *adsListener;
 
-@property (nonatomic, retain) NSString* publisherId;
+@property (nonatomic, retain) NSString* bannerAdId;
 @property (nonatomic, retain) NSString* interstitialAdId;
 @property (nonatomic, retain) NSString* rewardedAdId;
+@property (nonatomic, retain) NSString* appOpenAdId;
 @property (nonatomic, retain) NSString* tappxId;
 
 @property (assign) GADAdSize adSize;
@@ -92,8 +96,12 @@
 - (void)requestRewardedAd:(CDVInvokedUrlCommand *)command;
 - (void)showRewardedAd:(CDVInvokedUrlCommand *)command;
 
+- (void)requestAppOpenAd:(CDVInvokedUrlCommand *)command;
+- (void)showAppOpenAd:(CDVInvokedUrlCommand *)command;
+
 - (void)onBannerAd:(GADBannerView *)adView adListener:(CDVAdMobAdsAdListener *)adListener ;
 - (void)onInterstitialAd:(GADInterstitial *)interstitial adListener:(CDVAdMobAdsAdListener *)adListener;
 - (void)onRewardedAd:(GADRewardedAd *)rewarded adListener:(CDVAdMobAdsAdListener *)adListener;
+- (void)onAppOpenAd:(GADAppOpenAd *)appOpenAd adListener:(CDVAdMobAdsAdListener *)adListener;
 
 @end
