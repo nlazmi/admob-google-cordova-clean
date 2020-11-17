@@ -34,6 +34,7 @@
 @property (assign) BOOL isBannerRequested;
 @property (assign) BOOL isInterstitialRequested;
 @property (assign) BOOL isRewardedRequested;
+@property (assign) BOOL isAppOpenRequested;
 
 @property( assign) NSInteger rewardAmount;
 @property( assign) NSString* rewardType;
@@ -52,6 +53,7 @@
 - (NSString *) __getPublisherId:(BOOL)isTappx;
 - (NSString *) __getInterstitialId:(BOOL)isBackFill;
 - (NSString *) __getRewardedId;
+- (NSString *) __getAppOpenId;
 
 - (void)resizeViews;
 
@@ -66,10 +68,12 @@
 #define INTERSTITIAL                @"interstitial";
 #define REWARDED                    @"rewarded";
 #define BANNER                      @"banner";
+#define APP_OPEN                    @"app_open";
 
-#define OPT_PUBLISHER_ID            @"publisherId"
+#define OPT_PUBLISHER_ID            @"bannerAdId"
 #define OPT_INTERSTITIAL_ADID       @"interstitialAdId"
 #define OPT_REWARDED_ADID           @"rewardedAdId"
+#define OPT_APP_OPEN_ADID           @"appOpenAdId"
 #define OPT_AD_SIZE                 @"adSize"
 #define OPT_BANNER_AT_TOP           @"bannerAtTop"
 #define OPT_OVERLAP                 @"overlap"
@@ -84,16 +88,17 @@
 
 @synthesize isInterstitialAvailable;
 @synthesize isRewardedAvailable;
+@synthesize isAppOpenAvailable;
 
 @synthesize bannerView;
 @synthesize interstitialView;
 @synthesize rewardedView;
 @synthesize adsListener;
-@synthesize publisherId, interstitialAdId,rewardedAdId,  tappxId, adSize, tappxShare;
+@synthesize bannerAdId, interstitialAdId,rewardedAdId, appOpenAdId,  tappxId, adSize, tappxShare;
 @synthesize isBannerAtTop, isBannerOverlap, isOffsetStatusBar;
 @synthesize isTesting, adExtras;
 
-@synthesize isBannerVisible, isBannerInitialized, isBannerRequested, isInterstitialRequested, isRewardedRequested;
+@synthesize isBannerVisible, isBannerInitialized, isBannerRequested, isInterstitialRequested, isRewardedRequested, isAppOpenRequested;
 @synthesize isBannerShow, isBannerAutoShow, isInterstitialAutoShow,isRewardedAutoShow, hasTappx;
 @synthesize  rewardAmount,rewardType ;
 
@@ -111,9 +116,10 @@
      object:nil];
     
     isBannerShow = true;
-    publisherId = nil;
+    bannerAdId = nil;
     interstitialAdId = nil;
     rewardedAdId = nil;
+    appOpenAdId = nil;
     adSize = [self __adSizeFromString:@"SMART_BANNER"];
     
     isBannerAtTop = false;
@@ -131,6 +137,7 @@
     isBannerRequested = false;
     isInterstitialRequested = false;
     isRewardedRequested = false;
+    isAppOpenRequested = false;
     
     hasTappx = false;
     tappxShare = 0.5;
@@ -233,6 +240,29 @@
     }];
 }
 
+-(void)showAppOpenAd:(CDVInvokedUrlCommand *)command {
+    NSString *callbackId = command.callbackId;
+    
+    [self.commandDelegate runInBackground:^{
+        CDVPluginResult *pluginResult;
+        
+        if (!self.isAppOpenAvailable && self.appOpenAd) {
+            self.appOpenAd = nil;
+        }
+        
+        if (!self.appOpenAd) {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"App Open Ad is null, call requestAppOpenAd first."];
+        } else {
+            if(![self __showAppOpenAd:YES]) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Unable to show App Open ad"];
+            } else {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            }
+        }
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+    }];
+}
+
 - (void)showInterstitialAd:(CDVInvokedUrlCommand *)command {
     NSString *callbackId = command.callbackId;
     
@@ -319,6 +349,11 @@
     }
 }
 
+- (void)onAppOpenAd:(GADAppOpenAd *)appOpenAd adListener:(CDVAdMobAdsAdListener *)adListener {
+    self.isAppOpenAvailable = true;
+    self.appOpenAd = appOpenAd;
+}
+
 - (void)requestInterstitialAd:(CDVInvokedUrlCommand *)command {
     NSString *callbackId = command.callbackId;
     NSArray* args = command.arguments;
@@ -349,6 +384,35 @@
             }
         }
         
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+    }];
+}
+
+-(void)requestAppOpenAd:(CDVInvokedUrlCommand *)command {
+    NSString *callbackId = command.callbackId;
+    NSArray* args = command.arguments;
+    
+    NSUInteger argc = [args count];
+    if (argc >= 1) {
+        NSDictionary* options = [command argumentAtIndex:0 withDefault:[NSNull null]];
+        [self __setOptions:options];
+    }
+    
+    [self.commandDelegate runInBackground:^{
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        self.isAppOpenRequested = true;
+        if (!self.isAppOpenAvailable && self.appOpenAd) {
+            self.appOpenAd = nil;
+        }
+        
+        if (self.isAppOpenAvailable) {
+//            [adsListener appOpenDidReceiveAd:appOpenAd];
+        } else if (!self.appOpenAd) {
+            NSString *_iid = [self __getAppOpenId];
+            if (![self __createAppOpen:_iid withAdListener:self.adsListener]) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Unable to create App Open ad"];
+            }
+        }
         [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
     }];
 }
@@ -441,7 +505,7 @@
 }
 
 - (NSString *) __getPublisherId:(BOOL)isTappx {
-    NSString *_publisherId = publisherId;
+    NSString *_publisherId = bannerAdId;
     
     if (hasTappx && rand()%100 <= (tappxShare * 100)) {
         if (tappxId != nil && tappxId.length > 0) {
@@ -467,6 +531,12 @@
     return _rewardedAdId;
 }
 
+- (NSString *) __getAppOpenId {
+    NSString *_appOpenAdId = appOpenAdId;
+    
+    return _appOpenAdId;
+}
+
 
 #pragma mark Ad Banner logic
 
@@ -479,7 +549,7 @@
     
     str = [options objectForKey:OPT_PUBLISHER_ID];
     if (str && ![str isEqual:[NSNull null]] && [str length] > 0) {
-        publisherId = str;
+        bannerAdId = str;
     }
     
     str = [options objectForKey:OPT_INTERSTITIAL_ADID];
@@ -490,6 +560,11 @@
     str = [options objectForKey:OPT_REWARDED_ADID];
     if (str && ![str isEqual:[NSNull null]] && [str length] > 0) {
         rewardedAdId = str;
+    }
+    
+    str = [options objectForKey:OPT_APP_OPEN_ADID];
+    if (str && ![str isEqual:[NSNull null]] && [str length] > 0) {
+        appOpenAdId = str;
     }
     
     str = [options objectForKey:OPT_AD_SIZE];
@@ -679,13 +754,15 @@
         succeeded = true;
         
     } else if (show) {
-        UIView* parentView;
-        if (self.isBannerOverlap) {
-            parentView = self.webView;
-        } else {
-            parentView = [self.webView superview];
-        }
+       
         dispatch_async(dispatch_get_main_queue(), ^{
+            UIView* parentView;
+            if (self.isBannerOverlap) {
+                parentView = self.webView;
+            } else {
+                parentView = [self.webView superview];
+            }
+        
             [parentView addSubview:self.bannerView];
             [parentView bringSubviewToFront:self.bannerView];
             [self resizeViews];
@@ -702,6 +779,57 @@
         });
         
         succeeded = true;
+    }
+    
+    return succeeded;
+}
+
+- (BOOL) __createAppOpen:(NSString *)_appOpenId withAdListener:(CDVAdMobAdsAdListener *) adListener {
+    BOOL succeeded = false;
+    
+    if (self.appOpenAd) {
+        self.appOpenAd = nil;
+    }
+    
+    GADRequest *request = [self __buildAdRequest];
+    if (!request) {
+        succeeded = false;
+        if (self.appOpenAd) {
+            self.appOpenAd = nil;
+            
+        }
+    } else {
+        [GADAppOpenAd loadWithAdUnitID:_appOpenId request:request orientation:UIInterfaceOrientationPortrait completionHandler:^(GADAppOpenAd * _Nullable appOpenAd, NSError * _Nullable error) {
+            if (error) {
+                NSLog(@"Failed to load app open ad: %@", error);
+              
+            }
+            [adListener appOpenDidReceiveAd:appOpenAd];
+//            self.appOpenAd = appOpenAd;
+        }];
+    }
+    
+    return succeeded;
+}
+
+- (BOOL) __showAppOpenAd:(BOOL)show {
+    BOOL succeeded = false;
+    
+    if (!self.appOpenAd) {
+        NSString *_iid = [self __getAppOpenId];
+        
+        succeeded = [self __createAppOpen:_iid withAdListener:adsListener];
+        isAppOpenRequested = true;
+        
+    } else {
+        succeeded = true;
+    }
+    
+    if (self.appOpenAd) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.appOpenAd presentFromRootViewController:self.viewController];
+            self.isAppOpenRequested = false;
+        });
     }
     
     return succeeded;

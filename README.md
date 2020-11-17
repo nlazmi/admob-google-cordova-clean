@@ -6,20 +6,11 @@ A Cordova AdMob plugin used for Android and iOS.  It is free, with no ad sharing
 To install this plugin, follow the [Command-line Interface Guide](http://cordova.apache.org/docs/en/edge/guide_cli_index.md.html#The%20Command-line%20Interface). You can use one of the following command lines:
 
 ```
-cordova plugin add cordova-admob-jimmy --variable ADMOB_APP_ID="<YOUR_ANDROID_ADMOB_APP_ID_AS_FOUND_IN_ADMOB>"
+cordova plugin add cordova-admob-jimmy --variable ADMOB_APP_ID="<YOUR_ANDROID_ADMOB_APP_ID_AS_FOUND_IN_ADMOB>" --variable IOS_APP_ID="<YOUR_IOS_ADMOB_APP_ID>"
 
 ```
 * Note: If you add the correct ADMOB_APP_ID after the build you may need to remove the plugin and re-add it as the original value is saved in the plugin folder and overrides the config settings.
 
-
-
-Since version 7.42 of the Google AdMob Mobile Ads SDK for iOS, you must add the ADMOB_APP_ID to your Info.plist, which you can do by adding the folowing inside the <platform name="ios"> section in your config.xml file:
-
-```
-<config-file target="*-Info.plist" parent="GADApplicationIdentifier">
-    <string>YOUR_IOS_ADMOB_APP_ID_AS_FOUND_IN_ADMOB</string>
-</config-file>
-```
 
 ## Change Log ##
 
