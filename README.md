@@ -13,6 +13,9 @@ cordova plugin add cordova-admob-jimmy --variable ADMOB_APP_ID="<YOUR_ANDROID_AD
 
 
 ## Change Log ##
+4.8.0
+
+- App Open Ad format
 
 4.7.0
 

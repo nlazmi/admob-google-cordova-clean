@@ -105,6 +105,7 @@ public class AdMobAds extends CordovaPlugin {
 	private static final String OPT_AUTO_SHOW_BANNER = "autoShowBanner";
 	private static final String OPT_AUTO_SHOW_INTERSTITIAL = "autoShowInterstitial";
 	private static final String OPT_AUTO_SHOW_REWARDED = "autoShowRewarded";
+	private static final String OPT_AUTO_SHOW_APPOPEN = "autoShowAppOpen";
 	private static final String OPT_TAPPX_ID_ANDROID = "tappxIdAndroid";
 	private static final String OPT_TAPPX_SHARE = "tappxShare";
 	protected boolean isBannerAutoShow = true;
@@ -117,6 +118,7 @@ public class AdMobAds extends CordovaPlugin {
 	private boolean isMobileAdsInitialized = false;
 	private boolean isInterstitialAvailable = false;
 	private boolean isRewardedAvailable = false;
+	private boolean isAppOpenAvailable = false;
 	private boolean isNetworkActive = false;
 	//private View adView;
 	//private SearchAdView sadView;
@@ -344,6 +346,9 @@ public class AdMobAds extends CordovaPlugin {
 		}
 		if (options.has(OPT_AUTO_SHOW_REWARDED)) {
 			this.isRewardedAutoShow = options.optBoolean(OPT_AUTO_SHOW_REWARDED);
+		}
+		if (options.has(OPT_AUTO_SHOW_APPOPEN)) {
+			this.isAppOpenAutoShow = options.optBoolean(OPT_AUTO_SHOW_APPOPEN);
 		}
 		if (options.has(OPT_TAPPX_ID_ANDROID)) {
 			this.tappxId = options.optString(OPT_TAPPX_ID_ANDROID);
@@ -922,6 +927,10 @@ public class AdMobAds extends CordovaPlugin {
 			if (isRewardedAutoShow) {
 				showRewardedAd(null);
 			}
+		} else if (APPOPEN.equalsIgnoreCase(adType)) {
+			if (isAppOpenAutoShow) {
+				showAppOpenAd(null);
+			}
 		}
 	}
 
@@ -931,6 +940,9 @@ public class AdMobAds extends CordovaPlugin {
 		}
 		if (REWARDED.equalsIgnoreCase(adType)) {
 			isRewardedAvailable = false;
+		}
+		if (APPOPEN.equalsIgnoreCase(adType)) {
+			isOpenAvailable = false;
 		}
 	}
 }
