@@ -111,6 +111,7 @@ public class AdMobAds extends CordovaPlugin {
 	protected boolean isBannerAutoShow = true;
 	protected boolean isInterstitialAutoShow = true;
 	protected boolean isRewardedAutoShow = false;
+	protected boolean isAppOpenAutoShow = false;
 	private AdMobAdsAdListener bannerListener = new AdMobAdsAdListener(BANNER, this);
 	private AdMobAdsAdListener interstitialListener = new AdMobAdsAdListener(INTERSTITIAL, this);
 	private AdMobAdsAdListener appOpenListener = new AdMobAdsAdListener(APP_OPEN, this);
@@ -927,9 +928,9 @@ public class AdMobAds extends CordovaPlugin {
 			if (isRewardedAutoShow) {
 				showRewardedAd(null);
 			}
-		} else if (APPOPEN.equalsIgnoreCase(adType)) {
+		} else if (APP_OPEN.equalsIgnoreCase(adType)) {
 			if (isAppOpenAutoShow) {
-				showAppOpenAd(null);
+				showOpenAdIfAvailable(null);
 			}
 		}
 	}
@@ -941,8 +942,8 @@ public class AdMobAds extends CordovaPlugin {
 		if (REWARDED.equalsIgnoreCase(adType)) {
 			isRewardedAvailable = false;
 		}
-		if (APPOPEN.equalsIgnoreCase(adType)) {
-			isOpenAvailable = false;
+		if (APP_OPEN.equalsIgnoreCase(adType)) {
+			isAppOpenAvailable = false;
 		}
 	}
 }
