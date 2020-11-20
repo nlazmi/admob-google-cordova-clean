@@ -253,7 +253,7 @@
         if (!self.appOpenAd) {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"App Open Ad is null, call requestAppOpenAd first."];
         } else {
-            if(![self __showAppOpenAd:YES]) {
+            if(![self __showAppOpenAd:YES withAdListener:adsListener]) {
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Unable to show App Open ad"];
             } else {
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -406,7 +406,7 @@
         }
         
         if (self.isAppOpenAvailable) {
-//            [adsListener appOpenDidReceiveAd:appOpenAd];
+            [adsListener appOpenDidReceiveAd:self.appOpenAd];
         } else if (!self.appOpenAd) {
             NSString *_iid = [self __getAppOpenId];
             if (![self __createAppOpen:_iid withAdListener:self.adsListener]) {
@@ -804,23 +804,28 @@
                 NSLog(@"Failed to load app open ad: %@", error);
               
             }
+            else{
+                self.isAppOpenAvailable = true;
+            }
             [adListener appOpenDidReceiveAd:appOpenAd];
-//            self.appOpenAd = appOpenAd;
+            self.appOpenAd = appOpenAd;
         }];
+        
+        succeeded = true;
+        self.isAppOpenAvailable = false;
     }
     
     return succeeded;
 }
 
-- (BOOL) __showAppOpenAd:(BOOL)show {
+- (BOOL) __showAppOpenAd:(BOOL)show withAdListener:(CDVAdMobAdsAdListener *) adListener{
     BOOL succeeded = false;
     
-    if (!self.appOpenAd) {
+    if (!self.appOpenAd || !self.isAppOpenAvailable) {
         NSString *_iid = [self __getAppOpenId];
         
         succeeded = [self __createAppOpen:_iid withAdListener:adsListener];
         isAppOpenRequested = true;
-        
     } else {
         succeeded = true;
     }
@@ -829,6 +834,8 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.appOpenAd presentFromRootViewController:self.viewController];
             self.isAppOpenRequested = false;
+            self.isAppOpenAvailable = false;
+            [adListener appOpenDidAdOpened:self.appOpenAd];
         });
     }
     

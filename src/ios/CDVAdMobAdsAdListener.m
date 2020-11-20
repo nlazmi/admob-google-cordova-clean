@@ -53,6 +53,11 @@
     }];
     [adMobAds onAppOpenAd:appOpenAd adListener:self];
 }
+- (void)appOpenDidAdOpened:(GADAppOpenAd *)appOpenAd {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [adMobAds.commandDelegate evalJs:@"setTimeout(function (){ cordova.fireDocumentEvent(admob.events.onAdOpened, { 'adType' : 'app_open' }); }, 1);"];
+    }];
+}
 
 #pragma mark -
 #pragma mark GADBannerViewDelegate implementation

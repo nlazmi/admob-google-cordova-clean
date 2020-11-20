@@ -47,4 +47,6 @@
 - (void)rewardedDidFailedToShow:(GADRewardedAd *) rewarded;
 - (void)rewardAdDidReceiveAd:(GADRewardedAd *) rewarded;
 - (void)appOpenDidReceiveAd:(GADAppOpenAd *)appOpenAd;
+- (void)appOpenDidAdOpened:(GADAppOpenAd *)appOpenAd;
+
 @end
