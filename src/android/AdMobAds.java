@@ -143,6 +143,7 @@ public class AdMobAds extends CordovaPlugin {
 	private String rewardedAdId = "";
 	private String tappxId = "";
 	private AdSize adSize = AdSize.SMART_BANNER;
+	private static boolean isAdaptiveBanner = false; // Indicate if the current size is adaptive banner
 
 	/**
 	 * App Open ad
@@ -184,7 +185,11 @@ public class AdMobAds extends CordovaPlugin {
 			return AdSize.LEADERBOARD;
 		} else if ("SMART_BANNER".equals(size)) {
 			return AdSize.SMART_BANNER;
-		} else {
+		} else if("ADAPTIVE_BANNER".equals(size)){
+			isAdaptiveBanner = true;
+			return AdSize.SMART_BANNER;
+		} 
+		else {
 			return AdSize.SMART_BANNER;
 		}
 	}
@@ -421,7 +426,7 @@ public class AdMobAds extends CordovaPlugin {
 				}
 
 			} else {
-				adView.setAdSize(adSize);
+				setAdaptiveBannerSize(adSize);
 			}
 			adView.setAdUnitId(_pid);
 			adView.setAdListener(adListener);
@@ -434,6 +439,35 @@ public class AdMobAds extends CordovaPlugin {
 		isBannerVisible = false;
 		adView.loadAd(buildAdRequest());
 	}
+	
+	private void setAdaptiveBannerSize(AdSize adSize){
+
+		//check if this is adaptive banner
+		if(isAdaptiveBanner){
+			//gets current activity
+			Context p_context = AdMobAds.this.cordova.getActivity();
+			//now calculate the screen size
+			DisplayMetrics metrics = DisplayInfo(p_context);
+			AdSize adaptiveSize = getAdSize(metrics,p_context);
+			//finally, sets the ndynamic size
+			adView.setAdSize(adaptiveSize);
+		}
+		else{
+			adView.setAdSize(adSize);
+		}
+	}
+	
+	//according to docs : https://developers.google.com/admob/android/banner/anchored-adaptive
+	private AdSize getAdSize(DisplayMetrics outMetrics,Context p_context) {
+
+		float widthPixels = outMetrics.widthPixels;
+		float density = outMetrics.density;
+	
+		int adWidth = (int) (widthPixels / density);
+	
+		// Step 3 - Get adaptive ad size and return for setting on the ad view.
+		return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(p_context, adWidth);
+	  } 
 
 	@SuppressLint("DefaultLocale")
 	private AdRequest buildAdRequest() {

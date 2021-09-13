@@ -89,7 +89,8 @@ if (typeof angular !== 'undefined') {
         IAB_MRECT: 'IAB_MRECT',
         IAB_BANNER: 'IAB_BANNER',
         IAB_LEADERBOARD: 'IAB_LEADERBOARD',
-        SMART_BANNER: 'SMART_BANNER'
+        SMART_BANNER: 'SMART_BANNER',
+		ADAPTIVE_BANNER : 'ADAPTIVE_BANNER'
       },
       AD_TYPE: {
         BANNER: 'banner',
